@@ -6,6 +6,7 @@ use TentPHP\Tests\TestCase;
 use TentPHP\DBAL\DoctrineDBALState;
 use TentPHP\Application;
 use TentPHP\ApplicationConfig;
+use TentPHP\UserAuthorization;
 use Doctrine\DBAL\DriverManager;
 
 class DoctrineDBALStateTest extends TestCase
@@ -53,6 +54,22 @@ class DoctrineDBALStateTest extends TestCase
         $this->assertEquals('ab1234', $loadedConfig->getMacKeyId());
         $this->assertEquals('abcdefg', $loadedConfig->getMacKey());
         $this->assertEquals('hmac-sha-256', $loadedConfig->getMacAlgorithm());
+    }
+
+    public function testSaveLoadUserAuthorization()
+    {
+        $config = new ApplicationConfig(array(
+            'id' => 'e12345',
+        ));
+        $user = new UserAuthorization(array(
+            'access_token'  => 'abcdefg',
+            'mac_key'       => 'klimnj',
+            'mac_algorithm' => 'hmac-sha-256',
+            'token_type'    => 'hmac',
+        ));
+
+        $this->state->saveUserAuthorization('https://beberlei.tent.is', $config, $user);
+        $loadedUserAuthorization = $this->state->getUserAuthorization('https://beberlei.tent.is', $config);
     }
 }
 

@@ -62,7 +62,19 @@ class DoctrineDBALState implements ApplicationState
         $table->addColumn('mac_algorithm', 'string');
         $table->setPrimaryKey(array('id'));
         $table->addUniqueIndex(array('name', 'server_url'));
+
+        $table = $schema->createTable('tentc_user_authorizations');
+        $table->addColumn('id', 'integer', array('auto_increment' => true));
+        $table->addColumn('entity_url', 'string');
+        $table->addColumn('application_id', 'string');
+        $table->addColumn('access_token', 'string');
+        $table->addColumn('mac_key', 'string');
+        $table->addColumn('mac_algorithm', 'string');
+        $table->addColumn('token_type', 'string');
+        $table->setPrimaryKey(array('id'));
+        $table->addUniqueIndex(array('entity_url', 'application_id'));
     }
+
 
     /**
      * Given an entity url return the tent server urls this entity is managed on.
@@ -105,7 +117,8 @@ class DoctrineDBALState implements ApplicationState
      */
     public function getUserAuthorization($entityUrl, ApplicationConfig $config)
     {
-        $sql = 'SELECT * FROM tentc_user_authorizations WHERE entity_url = ? AND application_id = ?';
+        $sql = 'SELECT mac_key, access_token, mac_algorithm, token_type ' .
+               'FROM tentc_user_authorizations WHERE entity_url = ? AND application_id = ?';
         $row = $this->conn->fetchAssoc($sql, array($entityUrl, $config->getApplicationId()));
 
         return new UserAuthorization($row);
@@ -159,7 +172,14 @@ class DoctrineDBALState implements ApplicationState
      */
     public function saveUserAuthorization($entityUrl, ApplicationConfig $config, UserAuthorization $user)
     {
-        throw new \RuntimeException('Not implemented, yet.');
+        $this->conn->insert('tentc_user_authorizations', array(
+            'entity_url'     => $entityUrl,
+            'application_id' => $config->getApplicationId(),
+            'access_token'   => $user->getAccessToken(),
+            'mac_key'        => $user->getMacKey(),
+            'mac_algorithm'  => $user->getMacAlgorithm(),
+            'token_type'     => $user->getTokenType(),
+        ));
     }
 
     /**
