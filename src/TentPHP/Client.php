@@ -100,27 +100,38 @@ class Client
      */
     public function authorize($state, $code)
     {
-        list($entityUrl, $serverUrl) = $this->state->popStateToken($state);
+        $data = $this->state->popStateToken($state);
+
+        if (!$data) {
+            throw new \RuntimeException("No data found for state token " . $state);
+        }
+
+        list($entityUrl, $serverUrl) = $data;
 
         $config  = $this->state->getApplicationConfig($serverUrl, $this->application);
+
+        if (!$config) {
+            throw new \RuntimeException("Could not find application config for " . $serverUrl);
+        }
+
         $payload = json_encode(array('code' => $code, 'token_type' => 'mac'));
         $mac     = hash_hmac('sha256', self::base64UrlEncode($payload), $config->getMacKey());
 
         $auth = sprintf(
-            'Authorization: MAC id="%s", ts="%s", nonce="%s", mac="%s"',
-            $config->getApplicationId(),
+            'MAC id="%s", ts="%s", nonce="%s", mac="%s"',
+            $config->getMacKeyId(),
             time(),
             md5($entityUrl.uniqid()),
             $mac
         );
 
         $headers = array(
-            'Content-Type: application/vnd.tent.v0+json',
-            'Accept: application/vnd.tent.v0+json',
-            $auth
+            'Content-Type'  => 'application/vnd.tent.v0+json',
+            'Accept'        => 'application/vnd.tent.v0+json',
+            'Authorization' => $auth
         );
 
-        $url      = $serverUrl . "/apps/" . $config->getApplicationId() . "/authorize";
+        $url      = $serverUrl . "/apps/" . $config->getApplicationId() . "/authorizations";
         $response = $this->httpClient->post($url, $headers, $payload)->send();
 
         $userAuthorization = json_decode($response->getBody(), true);
@@ -146,10 +157,10 @@ class Client
 
         $state  = self::base64UrlEncode(openssl_random_pseudo_bytes(64));
         $params = array(
-            'client_id'               => $config->getApplicationId(),
-            'redirect_uri'            => $redirectUri ?: $this->application->getFirstRedirectUri(),
-            'scope'                   => implode(", ", $scopes ?: array_keys($this->application->getScopes())),
-            'state'                   => $state,
+            'client_id'    => $config->getApplicationId(),
+            'redirect_uri' => $redirectUri ?: $this->application->getFirstRedirectUri(),
+            'scope'        => implode(", ", $scopes ?: array_keys($this->application->getScopes())),
+            'state'        => $state,
         );
 
         $this->state->pushStateToken($state, $entityUrl, $firstServerUrl);

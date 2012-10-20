@@ -29,11 +29,11 @@ class Application
 
     public function getFirstRedirectUri()
     {
-        if (!isset($this->data['redirect_uri'][0])) {
+        if (!isset($this->data['redirect_uris'][0])) {
             throw new \RuntimeException("Application has no redirect urls configured.");
         }
 
-        return $this->data['redirect_uri'][0];
+        return $this->data['redirect_uris'][0];
     }
 
     public function getScopes()

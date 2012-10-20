@@ -33,8 +33,8 @@ class AppRegistration
     {
         $payload = json_encode($application->toArray());
         $headers = array(
-            'Content-Type: application/vnd.tent.v0+json',
-            'Accept: application/vnd.tent.v0+json',
+            'Content-Type' => 'application/vnd.tent.v0+json',
+            'Accept' => 'application/vnd.tent.v0+json',
         );
 
         try {

@@ -9,13 +9,13 @@ use Doctrine\DBAL\DriverManager;
 use Guzzle\Http\Client as HttpClient;
 
 $tentEntityUrl = 'https://beberlei.tent.is';
-$currentUrl    = "http://".$_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$currentUrl    = "http://".$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
 
 $application = new Application(array(
-    "name"        => "SimpleStatus",
-    "description" => "Very Simple Status App ",
-    "url"         => $currentUrl,
-    "icon"        => $currentUrl . "/icon.png",
+    "name"          => "SimpleStatus",
+    "description"   => "Very Simple Status App ",
+    "url"           => $currentUrl,
+    "icon"          => $currentUrl . "/icon.png",
     "redirect_uris" => array(
         $currentUrl ."?action=callback",
     ),

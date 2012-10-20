@@ -30,9 +30,9 @@ class ClientTest extends TestCase
     public function testGetLoginUrlFromPersistence()
     {
         $app    = new Application(array(
-            "name"         => "Hello World!",
-            "redirect_uri" => array("http://example.com/redirect"),
-            "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
+            "name"          => "Hello World!",
+            "redirect_uris" => array("http://example.com/redirect"),
+            "scopes"        => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
         $config = new ApplicationConfig(array(
             'id'            => 'e12345',
@@ -59,7 +59,7 @@ class ClientTest extends TestCase
     {
         $app    = new Application(array(
             "name"         => "Hello World!",
-            "redirect_uri" => array("http://example.com/redirect"),
+            "redirect_uris" => array("http://example.com/redirect"),
             "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
         $config = new ApplicationConfig(array(
@@ -97,7 +97,7 @@ class ClientTest extends TestCase
     {
         $app    = new Application(array(
             "name"         => "Hello World!",
-            "redirect_uri" => array("http://example.com/redirect"),
+            "redirect_uris" => array("http://example.com/redirect"),
             "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
 
@@ -135,7 +135,7 @@ JSON
     {
         $app    = new Application(array(
             "name"         => "Hello World!",
-            "redirect_uri" => array("http://example.com/redirect"),
+            "redirect_uris" => array("http://example.com/redirect"),
             "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
 
