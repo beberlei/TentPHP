@@ -73,6 +73,13 @@ class DoctrineDBALState implements ApplicationState
         $table->addColumn('token_type', 'string');
         $table->setPrimaryKey(array('id'));
         $table->addUniqueIndex(array('entity_url', 'application_id'));
+
+        $table = $schema->createTable('tentc_authorize_state_tokens');
+        $table->addColumn('id', 'integer', array('auto_increment' => true));
+        $table->addColumn('state_token', 'string', array('unique' => true));
+        $table->addColumn('entity_url', 'string');
+        $table->addColumn('server_url', 'string');
+        $table->setPrimaryKey(array('id'));
     }
 
 
@@ -191,7 +198,11 @@ class DoctrineDBALState implements ApplicationState
      */
     public function pushStateToken($state, $entityUrl, $serverUrl)
     {
-        throw new \RuntimeException('Not implemented, yet.');
+        $this->conn->insert('tentc_authorize_state_tokens', array(
+            'state_token' => $state,
+            'entity_url'  => $entityUrl,
+            'server_url'  => $serverUrl,
+        ));
     }
 
     /**
@@ -202,7 +213,16 @@ class DoctrineDBALState implements ApplicationState
      */
     public function popStateToken($state)
     {
-        throw new \RuntimeException('Not implemented, yet.');
+        $sql = 'SELECT * FROM tentc_authorize_state_tokens WHERE state_token = ?';
+        $row = $this->conn->fetchAssoc($sql, array($state));
+
+        if (!$row) {
+            return false;
+        }
+
+        $this->conn->delete('tentc_authorize_state_tokens', array('id' => $row['id']));
+
+        return array($row['entity_url'], $row['server_url']);
     }
 }
 

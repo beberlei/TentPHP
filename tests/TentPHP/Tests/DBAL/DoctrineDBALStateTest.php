@@ -71,5 +71,12 @@ class DoctrineDBALStateTest extends TestCase
         $this->state->saveUserAuthorization('https://beberlei.tent.is', $config, $user);
         $loadedUserAuthorization = $this->state->getUserAuthorization('https://beberlei.tent.is', $config);
     }
+
+    public function testPushPopStateToken()
+    {
+        $this->state->pushStateToken('a', 'b', 'c');
+        $this->assertEquals(array('b', 'c'), $this->state->popStateToken('a'));
+        $this->assertFalse($this->state->popStateToken('a'));
+    }
 }
 
