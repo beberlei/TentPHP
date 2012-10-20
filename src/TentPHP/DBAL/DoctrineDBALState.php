@@ -111,6 +111,10 @@ class DoctrineDBALState implements ApplicationState
         $sql = 'SELECT application_id as id, mac_key_id, mac_key, mac_algorithm FROM tentc_application_config WHERE server_url = ? AND name = ?';
         $row = $this->conn->fetchAssoc($sql, array($serverUrl, $application->getName()));
 
+        if (!$row) {
+            return null;
+        }
+
         return new ApplicationConfig($row);
     }
 

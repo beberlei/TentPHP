@@ -7,6 +7,7 @@ use TentPHP\ApplicationConfig;
 
 use Guzzle\Http\Client as HttpClient;
 use Guzzle\Http\Exception\ClientErrorResponseException;
+use Guzzle\Http\Exception\ServerErrorResponseException;
 
 class AppRegistration
 {
@@ -36,7 +37,14 @@ class AppRegistration
             'Accept: application/vnd.tent.v0+json',
         );
 
-        $response  = $this->httpClient->post(rtrim($serverUrl, '/') . '/apps', $headers, $payload)->send();
+        try {
+            $response  = $this->httpClient->post(rtrim($serverUrl, '/') . '/apps', $headers, $payload)->send();
+        } catch(ServerErrorResponseException $e) {
+            throw new \RuntimeException("Error registering application: " . $e->getMessage(), 0, $e);
+        } catch(ClientErrorResponseException $e) {
+            throw new \RuntimeException("Error registering application: " . $e->getMessage(), 0, $e);
+        }
+
         $appConfig = json_decode($response->getBody(), true);
 
         return new ApplicationConfig($appConfig);

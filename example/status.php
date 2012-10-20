@@ -43,7 +43,7 @@ $httpClient = new HttpClient();
 $client     = new Client($application, $httpClient, $state);
 
 
-$action = isset($_GET['action']) ? $_GET['acttion'] : 'status';
+$action = isset($_GET['action']) ? $_GET['action'] : 'status';
 
 switch ($action) {
     case 'login':

@@ -177,7 +177,7 @@ class Client
     {
         $servers = $this->state->getServers($entityUrl);
 
-        if ($servers === false) {
+        if ( ! $servers) {
             $servers = $this->discovery->discoverServers($entityUrl);
             $this->state->saveServers($entityUrl, $servers);
         }
