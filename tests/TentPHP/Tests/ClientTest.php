@@ -21,26 +21,36 @@ use Guzzle\Http\Client as HttpClient;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
+    private $httpMocks;
+    private $client;
+
+    public function setUp()
+    {
+        $this->httpMocks = new MockPlugin();
+
+        $httpclient = new HttpClient();
+        $httpclient->addSubscriber($this->httpMocks);
+
+        $this->client  = new Client($httpclient);
+    }
+
     public function testApplicationRegistration()
     {
-        $client = new Client(new HttpClient);
         $application = new Application(array(
             "name" => "Test Application",
         ));
 
-        $config = $client->registerApplication($application, "https://beberlei.tent.is");
+        $config = $this->client->registerApplication($application, "https://beberlei.tent.is");
 
         $this->assertInstanceOf('TentPHP\ApplicationConfig', $config);
     }
 
-
     public function testDiscoverEntityServers()
     {
-        $plugin = new MockPlugin();
-        $plugin->addResponse(new Response(200, array(
+        $this->httpMocks->addResponse(new Response(200, array(
             'Link' => '<https://beberlei.tent.is/tent/profile>; rel="https://tent.io/rels/profile"'
         ), ''));
-        $plugin->addResponse(new Response(200, array(), <<<JSON
+        $this->httpMocks->addResponse(new Response(200, array(), <<<JSON
 {
     "https://tent.io/types/info/basic/v0.1.0":{
         "name":"",
@@ -61,14 +71,22 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 JSON
         ));
 
-        $httpclient = new HttpClient();
-        $httpclient->addSubscriber($plugin);
-
-        $client  = new Client($httpclient);
-        $servers = $client->discoverServers("https://beberlei.tent.is");
+        $servers = $this->client->discoverServers("https://beberlei.tent.is");
 
         $this->assertInternalType('array', $servers);
         $this->assertEquals(array("https://beberlei.tent.is/tent", "https://tent.beberlei.de/tent"), $servers);
+    }
+
+    public function testDiscoverServersNoLink()
+    {
+        $this->httpMocks->addResponse(new Response(200));
+
+        $this->setExpectedException('TentPHP\Exception\EntityNotFoundException', 'No links found when querying the entity url.');
+        $servers = $this->client->discoverServers("https://beberlei.tent.is");
+    }
+
+    public function testDiscoverServersNoProfileLink()
+    {
     }
 }
 

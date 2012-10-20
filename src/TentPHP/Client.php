@@ -13,6 +13,7 @@
 
 namespace TentPHP;
 
+use TentPHP\Exception\EntityNotFoundException;
 use Guzzle\Http\Client as HttpClient;
 
 class Client
@@ -53,6 +54,10 @@ class Client
         }
 
         $links = $response->getHeader('Link');
+
+        if (!$links) {
+            throw new EntityNotFoundException("No links found when querying the entity url.");
+        }
 
         foreach ($links as $link) {
             if (preg_match('(<([^>]+)>; rel="https://tent.io/rels/profile")', $link, $match)) {
