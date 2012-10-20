@@ -15,6 +15,7 @@ namespace TentPHP;
 
 use TentPHP\Exception\EntityNotFoundException;
 use Guzzle\Http\Client as HttpClient;
+use Guzzle\Http\Exception\ClientErrorResponseException;
 
 class Client
 {
@@ -47,10 +48,11 @@ class Client
     public function discoverServers($entityUrl)
     {
         $profiles = $servers = array();
-        $response = $this->httpClient->head($entityUrl)->send();
 
-        if ($response->getStatusCode() !== 200) {
-            throw new EntityNotFoundException("Unsuccessful response querying the entity url for a profile link.");
+        try {
+            $response = $this->httpClient->head($entityUrl)->send();
+        } catch(ClientErrorResponseException $e) {
+            throw new EntityNotFoundException("Unsuccessful response querying the entity url for a profile link.", 0, $e);
         }
 
         $links = $response->getHeader('Link');
@@ -70,10 +72,11 @@ class Client
         }
 
         foreach ($profiles as $profileUrl) {
-            $response = $this->httpClient->get($profileUrl, array('Accept: application/vnd.tent.v0+json'))->send();
 
-            if ($response->getStatusCode() !== 200) {
-                throw new EntityNotFoundException("Unsuccessful resposne querying for profile " . $profileUrl);
+            try {
+                $response = $this->httpClient->get($profileUrl, array('Accept: application/vnd.tent.v0+json'))->send();
+            } catch(ClientErrorResponseException $e) {
+                throw new EntityNotFoundException("Unsuccessful response querying for profile " . $profileUrl);
             }
 
             $profile = json_decode($response->getBody(), true);
