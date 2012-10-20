@@ -1,0 +1,11 @@
+{
+    "name": "beberlei/php-tent-client",
+    "description": "PHP Application Client for the Tent.io protocol",
+    "license": "MIT",
+    "autoload": {
+        "psr-0": {"TentPHP": "src/"}
+    },
+    "require": {
+        "guzzle/guzzle": "*"
+    }
+}
