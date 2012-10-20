@@ -35,7 +35,7 @@ interface ApplicationState
      *
      * @return string
      */
-    public function getUserAccessToken($entityUrl, ApplicationConfig $config);
+    public function getUserAuthorization($entityUrl, ApplicationConfig $config);
 
     /**
      * Save the tent servers responsible for a given entity.
@@ -61,6 +61,23 @@ interface ApplicationState
      * @param ApplicationConfig $config
      * @param string $token
      */
-    public function saveUserAccessToken($entityUrl, ApplicationConfig $config, $token);
+    public function saveUserAuthorization($entityUrl, ApplicationConfig $config, UserAuthorization $user);
+
+    /**
+     * Save entity and server url that a state token is used to authorize for.
+     *
+     * @param string $state
+     * @param string $entityUrl
+     * @param string $serverUrl
+     */
+    public function pushStateToken($state, $entityUrl, $serverUrl);
+
+    /**
+     * Return entity and server url for a given state token. Remove token from stack.
+     *
+     * @param string $state
+     * @return array
+     */
+    public function popStateToken($state);
 }
 

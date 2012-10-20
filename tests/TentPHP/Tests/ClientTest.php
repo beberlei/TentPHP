@@ -14,6 +14,7 @@
 namespace TentPHP\Tests;
 
 use TentPHP\Client;
+use TentPHP\UserAuthorization;
 use TentPHP\Application;
 use TentPHP\ApplicationConfig;
 use Guzzle\Plugin\Mock\MockPlugin;
@@ -45,12 +46,13 @@ class ClientTest extends TestCase
         $state->shouldReceive('saveServers')->times(0);
         $state->shouldReceive('getApplicationConfig')->with(self::SERVERURL, $app)->andReturn($config);
         $state->shouldReceive('saveApplicationConfig')->times(0);
+        $state->shouldReceive('pushStateToken')->times(1);
 
         $httpClient = new HttpClient();
         $client = new Client($app, $httpClient, $state);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
-        $this->assertEquals("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
+        $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
     }
 
     public function testGetLoginUrlUnknownServerRegistersApplication()
@@ -72,6 +74,7 @@ class ClientTest extends TestCase
         $state->shouldReceive('saveServers')->with(self::ENTITYURL, array(self::SERVERURL));
         $state->shouldReceive('getApplicationConfig')->with(self::SERVERURL, $app);
         $state->shouldReceive('saveApplicationConfig')->with(self::SERVERURL, $app, $config);
+        $state->shouldReceive('pushStateToken')->times(1);
 
         $discovery = $this->mock('TentPHP\Server\EntityDiscovery');
         $discovery->shouldReceive('discoverServers')
@@ -87,7 +90,45 @@ class ClientTest extends TestCase
         $client = new Client($app, $httpClient, $state, $discovery, $appRegistration);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
-        $this->assertEquals("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
+        $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
+    }
+
+    public function testAuthorize()
+    {
+        $app    = new Application(array(
+            "name"         => "Hello World!",
+            "redirect_uri" => array("http://example.com/redirect"),
+            "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
+        ));
+
+        $config = new ApplicationConfig(array(
+            'id'            => 'e12345',
+            'mac_key_id'    => 'ab1234',
+            'mac_key'       => 'abcdefg',
+            'mac_algorithm' => 'hmac-sha-256',
+        ));
+
+        $state = $this->mock('TentPHP\ApplicationState');
+        $state->shouldReceive('popStateToken')->with('abcdefg')->andReturn(array(self::ENTITYURL, self::SERVERURL));
+        $state->shouldReceive('getApplicationConfig')->with(self::SERVERURL, $app)->andReturn($config);
+        $state->shouldReceive('saveUserAuthorization')->times(1)->with(self::ENTITYURL, $config, \Mockery::type('TentPHP\UserAuthorization'));
+
+        $httpMocks = new MockPlugin();
+        $httpMocks->addResponse(new Response(200, null, <<<JSON
+{
+    "access_token": "u:9a27c9c0",
+    "mac_key": "01a72852b917af2f16a782c08fcec23f",
+    "mac_algorithm": "hmac-sha-256",
+    "token_type": "mac"
+}
+JSON
+        ));
+
+        $httpClient = new HttpClient();
+        $httpClient->addSubscriber($httpMocks);
+
+        $client = new Client($app, $httpClient, $state);
+        $client->authorize('abcdefg', 'hijklmn');
     }
 }
 

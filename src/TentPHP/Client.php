@@ -49,10 +49,81 @@ class Client
         $this->appRegistration = $appRegistration ?: new AppRegistration($httpClient);
     }
 
-    public function getUser($entityUrl)
+    /**
+     * Get a client for a specific user.
+     *
+     * @param string $entityUrl
+     *
+     * @return UserClient
+     */
+    public function getUserClient($entityUrl)
     {
+        $servers = $this->state->getServers($entityUrl);
+        $configs = array();
+
+        if ( ! $servers) {
+            throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
+        }
+
+        foreach ($servers as $serverUrl) {
+            $config = $this->state->getApplicationConfig($serverUrl, $this->application);
+
+            if (!$config) {
+                throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
+            }
+
+            $configs[$serverUrl] = $config;
+        }
+
+        $userData = $this->state->getUserAuthorization($entityUrl, $configs[0]);
+
+        return new UserClient($this->httpClient, $this->application, $configs, $userData);
     }
 
+    private static function base64UrlEncode($input)
+    {
+        $str = strtr(base64_encode($input), '+/', '-_');
+        $str = str_replace('=', '', $str);
+        return $str;
+    }
+
+    /**
+     * Authorize an application for an entity user encoded into the state token.
+     *
+     * The state token contains a reference to the entity and server url that are
+     * part of the authorize operation. The code is sent to the server.
+     *
+     * @param string $state
+     * @param string $code
+     */
+    public function authorize($state, $code)
+    {
+        list($entityUrl, $serverUrl) = $this->state->popStateToken($state);
+
+        $config  = $this->state->getApplicationConfig($serverUrl, $this->application);
+        $payload = json_encode(array('code' => $code, 'token_type' => 'mac'));
+        $mac     = hash_hmac('sha256', self::base64UrlEncode($payload), $config->getMacKey());
+
+        $auth = sprintf(
+            'Authorization: MAC id="%s", ts="%s", nonce="%s", mac="%s"',
+            $config->getApplicationId(),
+            time(),
+            md5($entityUrl.uniqid()),
+            $mac
+        );
+
+        $headers = array(
+            'Content-Type: application/vnd.tent.v0+json',
+            'Accept: application/vnd.tent.v0+json',
+            $auth
+        );
+
+        $url      = $serverUrl . "/apps/" . $config->getApplicationId() . "/authorize";
+        $response = $this->httpClient->post($url, $headers, $payload)->send();
+
+        $userData = json_decode($response->getBody(), true);
+        $this->state->saveUserAuthorization($entityUrl, $config, new UserAuthorization($userData));
+    }
 
     /**
      * Get the login url for an entity
@@ -71,13 +142,15 @@ class Client
         $firstServerUrl = $this->getFirstServerUrl($entityUrl);
         $config         = $this->getApplicationConfig($firstServerUrl);
 
-        $state  = '';
+        $state  = self::base64UrlEncode(openssl_random_pseudo_bytes(64));
         $params = array(
             'client_id'               => $config->getApplicationId(),
             'redirect_uri'            => $redirectUri ?: $this->application->getFirstRedirectUri(),
             'scope'                   => implode(", ", $scopes ?: array_keys($this->application->getScopes())),
             'state'                   => $state,
         );
+
+        $this->state->pushStateToken($state, $entityUrl, $firstServerUrl);
 
         if ($infoTypes) {
             $params['tent_profile_info_types'] = is_array($infoTypes) ? implode(",", $infoTypes) : $infoTypes;
