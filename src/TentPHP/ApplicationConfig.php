@@ -15,5 +15,31 @@ namespace TentPHP;
 
 class ApplicationConfig
 {
+    private $data;
+
+    public function __construct(array $data)
+    {
+        $this->data = $data;
+    }
+
+    public function getApplicationId()
+    {
+        return $this->data['id'];
+    }
+
+    public function getMacKeyId()
+    {
+        return $this->data['mac_key_id'];
+    }
+
+    public function getMacKey()
+    {
+        return $this->data['mac_key'];
+    }
+
+    public function getMacAlgorithm()
+    {
+        return $this->data['mac_algorithm'];
+    }
 }
 

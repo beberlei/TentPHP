@@ -13,19 +13,21 @@
 
 namespace TentPHP;
 
+use TentPHP\Server\AppRegistration;
 use TentPHP\Server\EntityDiscovery;
 use Guzzle\Http\Client as HttpClient;
-use Guzzle\Http\Exception\ClientErrorResponseException;
 
 class Client
 {
     private $httpClient;
+    private $appRegistration;
     private $discovery;
 
-    public function __construct(HttpClient $httpClient, EntityDiscovery $discovery = null)
+    public function __construct(HttpClient $httpClient, EntityDiscovery $discovery = null, AppRegistration $appRegistration = null)
     {
-        $this->httpClient = $httpClient;
-        $this->discovery  = $discovery ?: new EntityDiscovery($httpClient);
+        $this->httpClient      = $httpClient;
+        $this->discovery       = $discovery ?: new EntityDiscovery($httpClient);
+        $this->appRegistration = $appRegistration ?: new AppRegistration($httpClient);
     }
 
     /**
@@ -39,20 +41,10 @@ class Client
     public function registerApplication(Application $application, $entityUrl)
     {
         $servers = $this->discovery->discoverServers($entityUrl);
-        $payload = json_encode($application->toArray());
-        $headers = array(
-            'Content-Type: application/vnd.tent.v0+json',
-            'Accept: application/vnd.tent.v0+json',
-        );
 
         foreach ($servers as $serverUrl) {
-            $response = $this->httpClient->post(rtrim($serverUrl, '/') . '/apps', $headers, $payload)->send();
-
-            $appConfig = json_decode($response->getBody());
+            $config = $this->appRegistration->register($application, $serverUrl);
         }
-
-        return new ApplicationConfig();
     }
-
 }
 

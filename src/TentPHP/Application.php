@@ -15,5 +15,16 @@ namespace TentPHP;
 
 class Application
 {
+    private $data;
+
+    public function __construct(array $data)
+    {
+        $this->data = $data;
+    }
+
+    public function toArray()
+    {
+        return $this->data;
+    }
 }
 
