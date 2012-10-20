@@ -62,10 +62,11 @@ class Client
      * @param string $redirectUri
      * @param array|string $infoTypes
      * @param array|string $postTypes
+     * @param string $notificationUrl
      *
      * @return string
      */
-    public function getLoginUrl($entityUrl, array $scopes = null, $redirectUri = null, $infoTypes = 'all', $postTypes = 'all')
+    public function getLoginUrl($entityUrl, array $scopes = null, $redirectUri = null, array $infoTypes = null, array $postTypes = null, $notificationUrl = null)
     {
         $firstServerUrl = $this->getFirstServerUrl($entityUrl);
         $config         = $this->getApplicationConfig($firstServerUrl);
@@ -76,9 +77,19 @@ class Client
             'redirect_uri'            => $redirectUri ?: $this->application->getFirstRedirectUri(),
             'scope'                   => implode(", ", $scopes ?: array_keys($this->application->getScopes())),
             'state'                   => $state,
-            'tent_profile_info_types' => is_array($infoTypes) ? implode(",", $infoTypes) : $infoTypes,
-            'tent_post_types'         => is_array($postTypes) ? implode(",", $postTypes) : $postTypes,
         );
+
+        if ($infoTypes) {
+            $params['tent_profile_info_types'] = is_array($infoTypes) ? implode(",", $infoTypes) : $infoTypes;
+        }
+
+        if ($postTypes) {
+            $params['tent_post_types'] = is_array($postTypes) ? implode(",", $postTypes) : $postTypes;
+        }
+
+        if ($notificationUrl) {
+            $params['tent_notification_url'] = $notificationUrl;
+        }
 
         return sprintf(
             '%s/oauth/authorize?%s',

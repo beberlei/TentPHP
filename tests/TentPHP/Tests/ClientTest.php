@@ -50,7 +50,7 @@ class ClientTest extends TestCase
         $client = new Client($app, $httpClient, $state);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
-        $this->assertEquals("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=&tent_profile_info_types=all&tent_post_types=all", $url);
+        $this->assertEquals("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
     }
 
     public function testGetLoginUrlUnknownServerRegistersApplication()
@@ -87,7 +87,7 @@ class ClientTest extends TestCase
         $client = new Client($app, $httpClient, $state, $discovery, $appRegistration);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
-        $this->assertEquals("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=&tent_profile_info_types=all&tent_post_types=all", $url);
+        $this->assertEquals("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
     }
 }
 
