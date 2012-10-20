@@ -49,9 +49,10 @@ interface ApplicationState
      * Save the application authorization config for a given server url.
      *
      * @param string $serverUrl
+     * @param Application $application
      * @param ApplicationConfig $config
      */
-    public function saveApplicationConfig($serverUrl, ApplicationConfig $config);
+    public function saveApplicationConfig($serverUrl, Application $application, ApplicationConfig $config);
 
     /**
      * Save the user access token for a given entity and application pair.

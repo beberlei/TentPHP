@@ -22,6 +22,20 @@ class Application
         $this->data = $data;
     }
 
+    public function getFirstRedirectUri()
+    {
+        if (!isset($this->data['redirect_uri'][0])) {
+            throw new \RuntimeException("Application has no redirect urls configured.");
+        }
+
+        return $this->data['redirect_uri'][0];
+    }
+
+    public function getScopes()
+    {
+        return $this->data['scopes'];
+    }
+
     public function toArray()
     {
         return $this->data;
