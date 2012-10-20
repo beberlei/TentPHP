@@ -19,10 +19,11 @@ use Guzzle\Plugin\Mock\MockPlugin;
 use Guzzle\Http\Message\Response;
 use Guzzle\Http\Client as HttpClient;
 
-class ClientTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends TestCase
 {
     private $httpMocks;
     private $client;
+    private $discovery;
 
     public function setUp()
     {

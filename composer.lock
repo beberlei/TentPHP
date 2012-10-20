@@ -1,5 +1,5 @@
 {
-    "hash": "91704706315dd8bbc2f13b29ea4057a9",
+    "hash": "fa85e99e95c21538b4849853ddaf1ae8",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -53,7 +53,7 @@
                 "zend/zend-log1": "1.12",
                 "zend/zend-cache1": "1.12"
             },
-            "time": "2012-10-15 18:12:36",
+            "time": "2012-10-15 16:12:36",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -113,7 +113,7 @@
                 "symfony/dependency-injection": "2.1.*",
                 "symfony/http-kernel": "2.1.*"
             },
-            "time": "2012-09-10 03:53:42",
+            "time": "2012-09-10 01:53:42",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -143,12 +143,66 @@
             "homepage": "http://symfony.com"
         }
     ],
-    "packages-dev": null,
+    "packages-dev": [
+        {
+            "name": "mockery/mockery",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git://github.com/padraic/mockery.git",
+                "reference": "b6adea3c241798c5afcbe2a2ac9294ce635a096f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/padraic/mockery/zipball/b6adea3c241798c5afcbe2a2ac9294ce635a096f",
+                "reference": "b6adea3c241798c5afcbe2a2ac9294ce635a096f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "suggest": {
+                "Hamcrest": "1.0.0"
+            },
+            "time": "1348513062",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "Mockery": "library/"
+                }
+            },
+            "license": [
+                "New BSD"
+            ],
+            "authors": [
+                {
+                    "name": "Pádraic Brady",
+                    "email": "padraic.brady@gmail.com",
+                    "homepage": "http://blog.astrumfutura.com"
+                }
+            ],
+            "description": "Mockery is a simple yet flexible PHP mock object framework for use in unit testing with PHPUnit, PHPSpec or any other testing framework. Its core goal is to offer a test double framework with a succint API capable of clearly defining all possible object operations and interactions using a human readable Domain Specific Language (DSL). Designed as a drop in alternative to PHPUnit's phpunit-mock-objects library, Mockery is easy to integrate with PHPUnit and can operate alongside phpunit-mock-objects without the World ending.",
+            "homepage": "http://github.com/padraic/mockery",
+            "keywords": [
+                "testing",
+                "library",
+                "BDD",
+                "TDD",
+                "test",
+                "mockery",
+                "mock",
+                "stub",
+                "test double",
+                "mock objects"
+            ]
+        }
+    ],
     "aliases": [
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": [
-
-    ]
+    "stability-flags": {
+        "mockery/mockery": 20
+    }
 }
