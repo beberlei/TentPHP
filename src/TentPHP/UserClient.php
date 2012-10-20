@@ -2,7 +2,58 @@
 
 namespace TentPHP;
 
+use Guzzle\Http\Client as HttpClient;
+
+/**
+ * Client for user authorized operations
+ */
 class UserClient
 {
+    private $httpClient;
+    private $serverUrl;
+    private $userAuthorization;
+
+    public function __construct(HttpClient $client, $serverUrl, UserAuthorization $userAuthorization)
+    {
+        $this->httpClient        = $client;
+        $this->serverUrl         = $serverUrl;
+        $this->userAuthorization = $userAuthorization;
+    }
+
+    public function getProfile()
+    {
+        return $this->request('GET', '/profile');
+    }
+
+    protected function request($method, $url, $body = null)
+    {
+        $payload = json_encode($body);
+        $mac     = hash_hmac('sha256', self::base64UrlEncode($payload), $this->userAuthorization->getMacKey());
+
+        $auth = sprintf(
+            'Authorization: MAC id="%s", ts="%s", nonce="%s", mac="%s"',
+            $this->userAuthorization->getAccessToken(),
+            time(),
+            uniqid('', true),
+            $mac
+        );
+
+        $headers = array(
+            'Content-Type: application/vnd.tent.v0+json',
+            'Accept: application/vnd.tent.v0+json',
+            $auth
+        );
+
+        $response = $this->httpClient->createRequest($method, $this->serverUrl . $url, $headers, $body)->send();
+
+        return json_decode($response->getBody(), true);
+    }
+
+    private static function base64UrlEncode($input)
+    {
+        $str = strtr(base64_encode($input), '+/', '-_');
+        $str = str_replace('=', '', $str);
+        return $str;
+    }
 }
 

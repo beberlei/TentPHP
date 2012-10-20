@@ -59,33 +59,27 @@ class Client
     public function getUserClient($entityUrl)
     {
         $servers  = $this->state->getServers($entityUrl);
-        $configs  = array();
-        $userData = null;
+        $userAuthorization = null;
 
         if ( ! $servers) {
             throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
         }
 
-        foreach ($servers as $serverUrl) {
-            $config = $this->state->getApplicationConfig($serverUrl, $this->application);
+        $firstServerUrl = array_shift($servers);
 
-            if (!$config) {
-                throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
-            }
+        $config = $this->state->getApplicationConfig($firstServerUrl, $this->application);
 
-            $configs[$serverUrl] = $config;
-
-            if ($userData === null) {
-                $userData = $this->state->getUserAuthorization($entityUrl, $config);
-            }
-        }
-
-
-        if ( !$userData) {
+        if (!$config) {
             throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
         }
 
-        return new UserClient($this->httpClient, $this->application, $configs, $userData);
+        $userAuthorization = $this->state->getUserAuthorization($entityUrl, $config);
+
+        if ( !$userAuthorization) {
+            throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
+        }
+
+        return new UserClient($this->httpClient, $firstServerUrl, $userAuthorization);
     }
 
     private static function base64UrlEncode($input)
@@ -129,8 +123,8 @@ class Client
         $url      = $serverUrl . "/apps/" . $config->getApplicationId() . "/authorize";
         $response = $this->httpClient->post($url, $headers, $payload)->send();
 
-        $userData = json_decode($response->getBody(), true);
-        $this->state->saveUserAuthorization($entityUrl, $config, new UserAuthorization($userData));
+        $userAuthorization = json_decode($response->getBody(), true);
+        $this->state->saveUserAuthorization($entityUrl, $config, new UserAuthorization($userAuthorization));
     }
 
     /**
