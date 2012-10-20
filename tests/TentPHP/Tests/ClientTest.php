@@ -26,6 +26,33 @@ class ClientTest extends TestCase
     const SERVERURL = 'https://beberlei.tent.is/tent';
     private $httpMocks;
 
+    public function testGetLoginUrlFromPersistence()
+    {
+        $app    = new Application(array(
+            "name"         => "Hello World!",
+            "redirect_uri" => array("http://example.com/redirect"),
+            "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
+        ));
+        $config = new ApplicationConfig(array(
+            'id'            => 'e12345',
+            'mac_key_id'    => 'ab1234',
+            'mac_key'       => 'abcdefg',
+            'mac_algorithm' => 'hmac-sha-256',
+        ));
+
+        $state = $this->mock('TentPHP\ApplicationState');
+        $state->shouldReceive('getServers')->with(self::ENTITYURL)->andReturn(array(self::SERVERURL));
+        $state->shouldReceive('saveServers')->times(0);
+        $state->shouldReceive('getApplicationConfig')->with(self::SERVERURL, $app)->andReturn($config);
+        $state->shouldReceive('saveApplicationConfig')->times(0);
+
+        $httpClient = new HttpClient();
+        $client = new Client($app, $httpClient, $state);
+        $url    = $client->getLoginUrl(self::ENTITYURL);
+
+        $this->assertEquals("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=&tent_profile_info_types=all&tent_post_types=all", $url);
+    }
+
     public function testGetLoginUrlUnknownServerRegistersApplication()
     {
         $app    = new Application(array(
