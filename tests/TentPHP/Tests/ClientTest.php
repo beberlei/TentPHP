@@ -22,41 +22,11 @@ use Guzzle\Http\Client as HttpClient;
 
 class ClientTest extends TestCase
 {
-    private $httpMocks;
-    private $client;
-    private $discovery;
-    private $appRegistration;
-
-    public function setUp()
+    public function testGetLoginUrlUnknownServerRegistersApplication()
     {
-        $this->httpMocks = new MockPlugin();
-        $this->discovery = $this->mock('TentPHP\Server\EntityDiscovery');
-        $this->appRegistration = $this->mock('TentPHP\Server\AppRegistration');
-
-        $httpclient = new HttpClient();
-        $httpclient->addSubscriber($this->httpMocks);
-
-        $this->client  = new Client($httpclient, $this->discovery, $this->appRegistration);
-    }
-
-    public function testApplicationRegistration()
-    {
-        $application = new Application(array(
-            "name" => "Test Application",
-        ));
-        $config = new ApplicationConfig(array(
-            'id' => '326ee3',
-        ));
-
-        $this->discovery->shouldReceive('discoverServers')
-                        ->with('https://beberlei.tent.is')
-                        ->andReturn(array('https://tent.is/tent'));
-
-        $this->appRegistration->shouldReceive('register')
-                              ->with($application, 'https://tent.is/tent')
-                              ->andReturn($config);
-
-        $this->client->registerApplication($application, "https://beberlei.tent.is");
+        $app    = new Application(array("name" => "Hello World!"));
+        $client = new Client($app);
+        $url    = $client->getLoginUrl('https://beberlei.tent.is');
     }
 }
 

@@ -17,34 +17,44 @@ use TentPHP\Server\AppRegistration;
 use TentPHP\Server\EntityDiscovery;
 use Guzzle\Http\Client as HttpClient;
 
+/**
+ * Tent.io Client
+ */
 class Client
 {
+    private $application;
     private $httpClient;
-    private $appRegistration;
     private $discovery;
+    private $appRegistration;
+    private $state;
 
-    public function __construct(HttpClient $httpClient, EntityDiscovery $discovery = null, AppRegistration $appRegistration = null)
+    /**
+     * @param Application      $application
+     * @param HttpClient       $httpClient
+     * @param EntityDiscovery  $discovery
+     * @param AppRegistration  $appRegistration
+     * @param ApplicationState $state
+     */
+    public function __construct(
+        Application $application,
+        HttpClient $httpClient,
+        ApplicationState $state,
+        EntityDiscovery $discovery = null,
+        AppRegistration $appRegistration = null)
     {
+        $this->application     = $application;
         $this->httpClient      = $httpClient;
+        $this->state           = $state;
         $this->discovery       = $discovery ?: new EntityDiscovery($httpClient);
         $this->appRegistration = $appRegistration ?: new AppRegistration($httpClient);
     }
 
-    /**
-     * Registers application with tent server of given user-entity.
-     *
-     * @param Application $application
-     * @param string $entityUrl
-     *
-     * @return ApplicationConfig
-     */
-    public function registerApplication(Application $application, $entityUrl)
+    public function getUser($entityUrl)
     {
-        $servers = $this->discovery->discoverServers($entityUrl);
+    }
 
-        foreach ($servers as $serverUrl) {
-            $config = $this->appRegistration->register($application, $serverUrl);
-        }
+    public function getLoginUrl($entityUrl)
+    {
     }
 }
 

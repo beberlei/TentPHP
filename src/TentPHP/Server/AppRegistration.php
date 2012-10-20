@@ -17,6 +17,17 @@ class AppRegistration
         $this->httpClient = $httpClient;
     }
 
+    /**
+     * Register application with the server
+     *
+     * This function performs no checks if this application already
+     * exists. This is done at other levels.
+     *
+     * @param Application $application
+     * @param string $serverUrl
+     *
+     * @return ApplicationConfig
+     */
     public function register(Application $application, $serverUrl)
     {
         $payload = json_encode($application->toArray());
