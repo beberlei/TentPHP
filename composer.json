@@ -1,5 +1,5 @@
 {
-    "name": "beberlei/php-tent-client",
+    "name": "beberlei/tent-php",
     "description": "PHP Application Client for the Tent.io protocol",
     "license": "MIT",
     "autoload": {
