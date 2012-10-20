@@ -67,6 +67,14 @@ class UserClient
 
     public function createPost(Post $post)
     {
+        return $this->request('POST', '/posts', array(
+            'type'         => $post->getType(),
+            'published_at' => $post->getPublishedAt() ?: time(),
+            'permissions'  => $post->getPermissions(),
+            'licenses'     => $post->getLicenses(),
+            'content'      => $post->getContent(),
+            'mentions'     => $post->getMentions(),
+        ));
     }
 
     public function getPosts(PostCriteria $criteria = null)
