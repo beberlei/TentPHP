@@ -13,17 +13,19 @@
 
 namespace TentPHP;
 
-use TentPHP\Exception\EntityNotFoundException;
+use TentPHP\Server\EntityDiscovery;
 use Guzzle\Http\Client as HttpClient;
 use Guzzle\Http\Exception\ClientErrorResponseException;
 
 class Client
 {
     private $httpClient;
+    private $discovery;
 
-    public function __construct(HttpClient $httpClient)
+    public function __construct(HttpClient $httpClient, EntityDiscovery $discovery = null)
     {
         $this->httpClient = $httpClient;
+        $this->discovery  = $discovery ?: new EntityDiscovery($httpClient);
     }
 
     /**
@@ -36,59 +38,21 @@ class Client
      */
     public function registerApplication(Application $application, $entityUrl)
     {
+        $servers = $this->discovery->discoverServers($entityUrl);
+        $payload = json_encode($application->toArray());
+        $headers = array(
+            'Content-Type: application/vnd.tent.v0+json',
+            'Accept: application/vnd.tent.v0+json',
+        );
+
+        foreach ($servers as $serverUrl) {
+            $response = $this->httpClient->post(rtrim($serverUrl, '/') . '/apps', $headers, $payload)->send();
+
+            $appConfig = json_decode($response->getBody());
+        }
+
         return new ApplicationConfig();
     }
 
-    /**
-     * Discover the Tent Servers responsible for a given tent entity.
-     *
-     * @param string $entityUrl
-     * @return array
-     */
-    public function discoverServers($entityUrl)
-    {
-        $profiles = $servers = array();
-
-        try {
-            $response = $this->httpClient->head($entityUrl)->send();
-        } catch(ClientErrorResponseException $e) {
-            throw new EntityNotFoundException("Unsuccessful response querying the entity url for a profile link.", 0, $e);
-        }
-
-        $links = $response->getHeader('Link');
-
-        if (!$links) {
-            throw new EntityNotFoundException("No links found when querying the entity url.");
-        }
-
-        foreach ($links as $link) {
-            if (preg_match('(<([^>]+)>; rel="https://tent.io/rels/profile")', $link, $match)) {
-                $profiles[] = $match[1];
-            }
-        }
-
-        if (!$profiles) {
-            throw new EntityNotFoundException("No profile links found when querying the entity url.");
-        }
-
-        foreach ($profiles as $profileUrl) {
-
-            try {
-                $response = $this->httpClient->get($profileUrl, array('Accept: application/vnd.tent.v0+json'))->send();
-            } catch(ClientErrorResponseException $e) {
-                throw new EntityNotFoundException("Unsuccessful response querying for profile " . $profileUrl);
-            }
-
-            $profile = json_decode($response->getBody(), true);
-
-            if ( ! isset($profile['https://tent.io/types/info/core/v0.1.0']['servers'])) {
-                throw new EntityNotFoundException("Incomplete response querying for profile " . $profileUrl . ". No servers key found in tent core info type.");
-            }
-
-            $servers = array_merge($servers, $profile['https://tent.io/types/info/core/v0.1.0']['servers']);
-        }
-
-        return $servers;
-    }
 }
 
