@@ -25,6 +25,62 @@ class UserClient
         return $this->request('GET', '/profile');
     }
 
+    public function putProfileType($type, array $data)
+    {
+        return $this->request('PUT', '/profile/' . urlencode($type), $data);
+    }
+
+    public function follow($entityUrl)
+    {
+        return $this->request('POST', '/followings', array('entity' => $entityUrl));
+    }
+
+    public function getFollowings()
+    {
+        return $this->request('GET', '/followings');
+    }
+
+    public function getFollowing($remoteId)
+    {
+        return $this->request('GET', '/followings/' . $remoteId);
+    }
+
+    public function unfollow($remoteId)
+    {
+        return $this->request('DELETE', '/followings/' . $remoteId);
+    }
+
+    public function getFollowers()
+    {
+        return $this->request('GET', '/followers');
+    }
+
+    public function getFollower($remoteId)
+    {
+        return $this->request('GET', '/followers/' . $remoteId);
+    }
+
+    public function blockFollower($remoteId)
+    {
+        return $this->request('DELETE', '/followers/' . $remoteId);
+    }
+
+    public function createPost(Post $post)
+    {
+    }
+
+    public function getPosts(PostCriteria $criteria = null)
+    {
+    }
+
+    public function getPost($id)
+    {
+    }
+
+    public function getPostAttachment($id, $filename)
+    {
+    }
+
     protected function request($method, $url, $body = null)
     {
         $payload = json_encode($body);
