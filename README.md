@@ -14,3 +14,5 @@ state about Tent Servers Url and their OAuth Client Ids and Mac Keys.
 This application state is hidden behind a persistence interface
 ``TentPHP\Persistence\ApplicationState``. We are shipping a Doctrine DBAL
 based implementation.
+
+## API

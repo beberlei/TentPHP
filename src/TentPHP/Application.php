@@ -22,6 +22,11 @@ class Application
         $this->data = $data;
     }
 
+    public function getName()
+    {
+        return $this->data['name'];
+    }
+
     public function getFirstRedirectUri()
     {
         if (!isset($this->data['redirect_uri'][0])) {

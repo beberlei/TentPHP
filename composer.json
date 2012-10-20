@@ -8,7 +8,11 @@
     "require": {
         "guzzle/guzzle": "*"
     },
+    "suggest": {
+        "doctrine/dbal": "*"
+    },
     "require-dev": {
-        "mockery/mockery": "dev-master"
+        "mockery/mockery": "dev-master",
+        "doctrine/dbal": "*"
     }
 }
