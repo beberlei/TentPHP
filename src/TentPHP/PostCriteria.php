@@ -20,6 +20,11 @@ class PostCriteria extends DataObject
         'limit'            => null,
     );
 
+    public function __construct(array $data = array())
+    {
+        $this->data = array_merge($this->data, $data);
+    }
+
     /**
      * @return array
      */
