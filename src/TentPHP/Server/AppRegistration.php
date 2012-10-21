@@ -4,6 +4,7 @@ namespace TentPHP\Server;
 
 use TentPHP\Application;
 use TentPHP\ApplicationConfig;
+use TentPHP\HmacHelper;
 
 use Guzzle\Http\Client as HttpClient;
 use Guzzle\Http\Exception\ClientErrorResponseException;
