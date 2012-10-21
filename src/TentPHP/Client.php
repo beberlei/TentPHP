@@ -145,7 +145,7 @@ class Client
         $params = array(
             'client_id'    => $config->getApplicationId(),
             'redirect_uri' => $redirectUri ?: $this->application->getFirstRedirectUri(),
-            'scope'        => implode(", ", $scopes ?: array_keys($this->application->getScopes())),
+            'scope'        => implode(",", $scopes ?: array_keys($this->application->getScopes())),
             'state'        => $state,
         );
 
