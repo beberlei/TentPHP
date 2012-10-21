@@ -82,13 +82,6 @@ class Client
         return new UserClient($this->httpClient, $firstServerUrl, $userAuthorization);
     }
 
-    private static function base64UrlEncode($input)
-    {
-        $str = strtr(base64_encode($input), '+/', '-_');
-        $str = str_replace('=', '', $str);
-        return $str;
-    }
-
     /**
      * Authorize an application for an entity user encoded into the state token.
      *
@@ -148,7 +141,7 @@ class Client
         $firstServerUrl = $this->getFirstServerUrl($entityUrl);
         $config         = $this->getApplicationConfig($firstServerUrl);
 
-        $state  = self::base64UrlEncode(openssl_random_pseudo_bytes(64));
+        $state  = str_replace(array('/', '+', '='), '', base64_encode(openssl_random_pseudo_bytes(64)));
         $params = array(
             'client_id'    => $config->getApplicationId(),
             'redirect_uri' => $redirectUri ?: $this->application->getFirstRedirectUri(),
@@ -175,6 +168,51 @@ class Client
             $firstServerUrl,
             http_build_query($params)
         );
+    }
+
+    /**
+     * Get application details saved on the given tent server.
+     *
+     * @param string $serverUrl
+     *
+     * @return array
+     */
+    public function getApplication($serverUrl)
+    {
+        $config  = $this->state->getApplicationConfig($serverUrl, $this->application);
+
+        if (!$config) {
+            throw new \RuntimeException("Could not find application config for " . $serverUrl);
+        }
+
+        $url  = $serverUrl . "/apps/" . $config->getApplicationId();
+        $auth = HmacHelper::generateAuthorizationHeader('GET', $url, $config->getMacKeyId(), $config->getMacKey());
+
+        $headers = array(
+            'Content-Type'  => 'application/vnd.tent.v0+json',
+            'Accept'        => 'application/vnd.tent.v0+json',
+            'Authorization' => $auth
+        );
+
+        $response = $this->httpClient->get($url, $headers)->send();
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Update the application with the current data on the given server.
+     *
+     * @param string $serverUrl
+     */
+    public function updateApplication($serverUrl)
+    {
+        $config  = $this->state->getApplicationConfig($serverUrl, $this->application);
+
+        if (!$config) {
+            throw new \RuntimeException("Could not find application config for " . $serverUrl);
+        }
+
+        return $this->appRegistration->update($this->application, $config, $serverUrl);
     }
 
     private function getFirstServerUrl($entityUrl)

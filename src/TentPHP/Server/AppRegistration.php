@@ -49,5 +49,35 @@ class AppRegistration
 
         return new ApplicationConfig($appConfig);
     }
+
+    /**
+     * Update application details on the given server
+     *
+     * @param Application $application
+     * @param ApplicationConfig $config
+     * @param string $serverUrl
+     * @return ApplicationConfig
+     */
+    public function update(Application $application, ApplicationConfig $config, $serverUrl)
+    {
+        $payload = json_encode($application->toArray());
+        $auth    = HmacHelper::generateAuthorizationHeader('PUT', $url, $config->getMacKeyId(), $config->getMacKey());
+        $headers = array(
+            'Content-Type'  => 'application/vnd.tent.v0+json',
+            'Accept'        => 'application/vnd.tent.v0+json',
+            'Authorization' => $auth,
+        );
+
+        try {
+            $url      = rtrim($serverUrl, '/') . '/apps/' . $config->getApplicationId();
+            $response = $this->httpClient->put($url, $headers, $payload)->send();
+        } catch(ServerErrorResponseException $e) {
+            throw new \RuntimeException("Error registering application: " . $e->getMessage(), 0, $e);
+        } catch(ClientErrorResponseException $e) {
+            throw new \RuntimeException("Error registering application: " . $e->getMessage(), 0, $e);
+        }
+
+        return json_decode($response->getBody(), true);
+    }
 }
 
