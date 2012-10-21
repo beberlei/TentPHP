@@ -62,6 +62,7 @@ class AppRegistration
     public function update(Application $application, ApplicationConfig $config, $serverUrl)
     {
         $payload = json_encode($application->toArray());
+        $url     = rtrim($serverUrl, '/') . '/apps/' . $config->getApplicationId();
         $auth    = HmacHelper::generateAuthorizationHeader('PUT', $url, $config->getMacKeyId(), $config->getMacKey());
         $headers = array(
             'Content-Type'  => 'application/vnd.tent.v0+json',
@@ -70,7 +71,6 @@ class AppRegistration
         );
 
         try {
-            $url      = rtrim($serverUrl, '/') . '/apps/' . $config->getApplicationId();
             $response = $this->httpClient->put($url, $headers, $payload)->send();
         } catch(ServerErrorResponseException $e) {
             throw new \RuntimeException("Error registering application: " . $e->getMessage(), 0, $e);
