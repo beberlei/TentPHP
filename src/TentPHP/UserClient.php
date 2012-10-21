@@ -67,14 +67,14 @@ class UserClient
 
     public function createPost(Post $post)
     {
-        return $this->request('POST', '/posts', array(
+        return $this->request('POST', '/posts', array_filter(array(
             'type'         => $post->getType(),
             'published_at' => $post->getPublishedAt() ?: time(),
             'permissions'  => $post->getPermissions(),
             'licenses'     => $post->getLicenses(),
             'content'      => $post->getContent(),
             'mentions'     => $post->getMentions(),
-        ));
+        )));
     }
 
     public function getPosts(PostCriteria $criteria = null)
@@ -91,33 +91,25 @@ class UserClient
 
     protected function request($method, $url, $body = null)
     {
-        $payload = json_encode($body);
-        $mac     = hash_hmac('sha256', self::base64UrlEncode($payload), $this->userAuthorization->getMacKey());
+        $payload = $body ? json_encode($body) : null;
+        $url     = $this->serverUrl . $url;
 
-        $auth = sprintf(
-            'Authorization: MAC id="%s", ts="%s", nonce="%s", mac="%s"',
+        $auth = HmacHelper::generateAuthorizationHeader(
+            $method,
+            $url,
             $this->userAuthorization->getAccessToken(),
-            time(),
-            uniqid('', true),
-            $mac
+            $this->userAuthorization->getMacKey()
         );
 
         $headers = array(
-            'Content-Type: application/vnd.tent.v0+json',
-            'Accept: application/vnd.tent.v0+json',
-            $auth
+            'Content-Type'  => 'application/vnd.tent.v0+json',
+            'Accept'        => 'application/vnd.tent.v0+json',
+            'Authorization' => $auth,
         );
 
-        $response = $this->httpClient->createRequest($method, $this->serverUrl . $url, $headers, $body)->send();
+        $response = $this->httpClient->createRequest($method, $url, $headers, $payload)->send();
 
         return json_decode($response->getBody(), true);
-    }
-
-    private static function base64UrlEncode($input)
-    {
-        $str = strtr(base64_encode($input), '+/', '-_');
-        $str = str_replace('=', '', $str);
-        return $str;
     }
 }
 

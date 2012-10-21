@@ -114,16 +114,10 @@ class Client
             throw new \RuntimeException("Could not find application config for " . $serverUrl);
         }
 
-        $payload = json_encode(array('code' => $code, 'token_type' => 'mac'));
-        $mac     = hash_hmac('sha256', self::base64UrlEncode($payload), $config->getMacKey());
+        $url      = $serverUrl . "/apps/" . $config->getApplicationId() . "/authorizations";
+        $payload  = json_encode(array('code' => $code, 'token_type' => 'mac'));
 
-        $auth = sprintf(
-            'MAC id="%s", ts="%s", nonce="%s", mac="%s"',
-            $config->getMacKeyId(),
-            time(),
-            md5($entityUrl.uniqid()),
-            $mac
-        );
+        $auth = HmacHelper::generateAuthorizationHeader('POST', $url, $config->getMacKeyId(), $config->getMacKey());
 
         $headers = array(
             'Content-Type'  => 'application/vnd.tent.v0+json',
@@ -131,7 +125,6 @@ class Client
             'Authorization' => $auth
         );
 
-        $url      = $serverUrl . "/apps/" . $config->getApplicationId() . "/authorizations";
         $response = $this->httpClient->post($url, $headers, $payload)->send();
 
         $userAuthorization = json_decode($response->getBody(), true);
