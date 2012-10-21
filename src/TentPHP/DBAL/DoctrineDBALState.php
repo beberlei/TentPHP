@@ -46,14 +46,14 @@ class DoctrineDBALState implements ApplicationState
     public function extendSchema(Schema $schema)
     {
         $table = $schema->createTable('tentc_servers');
-        $table->addColumn('id', 'integer', array('auto_increment' => true));
+        $table->addColumn('id', 'integer', array('autoincrement' => true));
         $table->addColumn('entity_url', 'string');
         $table->addColumn('server_url', 'string');
         $table->setPrimaryKey(array('id'));
         $table->addUniqueIndex(array('entity_url', 'server_url'));
 
         $table = $schema->createTable('tentc_application_config');
-        $table->addColumn('id', 'integer', array('auto_increment' => true));
+        $table->addColumn('id', 'integer', array('autoincrement' => true));
         $table->addColumn('name', 'string');
         $table->addColumn('server_url', 'string');
         $table->addColumn('application_id', 'string');
@@ -64,7 +64,7 @@ class DoctrineDBALState implements ApplicationState
         $table->addUniqueIndex(array('name', 'server_url'));
 
         $table = $schema->createTable('tentc_user_authorizations');
-        $table->addColumn('id', 'integer', array('auto_increment' => true));
+        $table->addColumn('id', 'integer', array('autoincrement' => true));
         $table->addColumn('entity_url', 'string');
         $table->addColumn('application_id', 'string');
         $table->addColumn('access_token', 'string');
@@ -75,7 +75,7 @@ class DoctrineDBALState implements ApplicationState
         $table->addUniqueIndex(array('entity_url', 'application_id'));
 
         $table = $schema->createTable('tentc_authorize_state_tokens');
-        $table->addColumn('id', 'integer', array('auto_increment' => true));
+        $table->addColumn('id', 'integer', array('autoincrement' => true));
         $table->addColumn('state_token', 'string', array('unique' => true));
         $table->addColumn('entity_url', 'string');
         $table->addColumn('server_url', 'string');
