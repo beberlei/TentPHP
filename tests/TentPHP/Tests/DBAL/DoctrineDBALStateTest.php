@@ -72,6 +72,24 @@ class DoctrineDBALStateTest extends TestCase
         $loadedUserAuthorization = $this->state->getUserAuthorization('https://beberlei.tent.is', $config);
     }
 
+    public function testSaveUserAuthorizationTwiceDoesUpdate()
+    {
+        $config = new ApplicationConfig(array(
+            'id' => 'e12345',
+        ));
+        $user = new UserAuthorization(array(
+            'access_token'  => 'abcdefg',
+            'mac_key'       => 'klimnj',
+            'mac_algorithm' => 'hmac-sha-256',
+            'token_type'    => 'hmac',
+        ));
+
+        $this->state->saveUserAuthorization('https://beberlei.tent.is', $config, $user);
+        $this->state->saveUserAuthorization('https://beberlei.tent.is', $config, $user);
+
+        $this->assertEquals(1, $this->conn->fetchColumn('SELECT count(*) FROM tentc_user_authorizations'));
+    }
+
     public function testPushPopStateToken()
     {
         $this->state->pushStateToken('a', 'b', 'c');

@@ -183,14 +183,32 @@ class DoctrineDBALState implements ApplicationState
      */
     public function saveUserAuthorization($entityUrl, ApplicationConfig $config, UserAuthorization $user)
     {
-        $this->conn->insert('tentc_user_authorizations', array(
-            'entity_url'     => $entityUrl,
-            'application_id' => $config->getApplicationId(),
-            'access_token'   => $user->getAccessToken(),
-            'mac_key'        => $user->getMacKey(),
-            'mac_algorithm'  => $user->getMacAlgorithm(),
-            'token_type'     => $user->getTokenType(),
-        ));
+        try {
+            $this->conn->beginTransaction();
+            $platform = $this->conn->getDatabasePlatform();
+
+            $sql = "SELECT id FROM tentc_user_authorizations WHERE entity_url = ? AND application_id = ?" . $platform->getForUpdateSql();
+            $id = $this->conn->fetchColumn($sql, array($entityUrl, $config->getApplicationId()));
+
+            $data = array(
+                'entity_url'     => $entityUrl,
+                'application_id' => $config->getApplicationId(),
+                'access_token'   => $user->getAccessToken(),
+                'mac_key'        => $user->getMacKey(),
+                'mac_algorithm'  => $user->getMacAlgorithm(),
+                'token_type'     => $user->getTokenType(),
+            );
+
+            if ($id) {
+                $this->conn->update('tentc_user_authorizations', $data, array('id' => $id));
+            } else {
+                $this->conn->insert('tentc_user_authorizations', $data);
+            }
+
+        } catch(\Exception $e) {
+            $this->conn->rollback();
+            throw $e;
+        }
     }
 
     /**
