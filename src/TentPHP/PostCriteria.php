@@ -19,5 +19,13 @@ class PostCriteria extends DataObject
         'post_types'       => null,
         'limit'            => null,
     );
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return array_filter($this->data);
+    }
 }
 

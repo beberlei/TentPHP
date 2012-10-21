@@ -79,14 +79,17 @@ class UserClient
 
     public function getPosts(PostCriteria $criteria = null)
     {
+        return $this->request('GET', '/posts', $criteria->toArray());
     }
 
     public function getPost($id)
     {
+        return $this->request('GET', '/posts/' . $id);
     }
 
     public function getPostAttachment($id, $filename)
     {
+        throw new \RuntimeException("Not yet implemented.");
     }
 
     protected function request($method, $url, $body = null)
