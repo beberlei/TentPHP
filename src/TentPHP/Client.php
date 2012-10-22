@@ -90,6 +90,8 @@ class Client
      *
      * @param string $state
      * @param string $code
+     *
+     * @return string $entityUrl
      */
     public function authorize($state, $code)
     {
@@ -122,6 +124,8 @@ class Client
 
         $userAuthorization = json_decode($response->getBody(), true);
         $this->state->saveUserAuthorization($entityUrl, $config, new UserAuthorization($userAuthorization));
+
+        return $entityUrl;
     }
 
     /**
