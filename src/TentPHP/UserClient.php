@@ -77,6 +77,25 @@ class UserClient
         )));
     }
 
+    /**
+     * Delete a post from the tent server
+     *
+     * @param string|Post $post The id or a post instance
+     * @return array
+     */
+    public function deletePost($post)
+    {
+        if ($post instanceof Post) {
+            $post = $post->getId();
+        }
+
+        if (!$post) {
+            throw new \InvalidArgumentException("No post id given");
+        }
+
+        return $this->request('DELETE', '/posts/' . $post);
+    }
+
     public function getPosts(PostCriteria $criteria = null)
     {
         return $this->request('GET', '/posts', $criteria->toArray());
