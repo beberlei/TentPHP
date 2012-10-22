@@ -98,7 +98,7 @@ class UserClient
 
     public function getPosts(PostCriteria $criteria = null)
     {
-        return $this->request('GET', '/posts', $criteria->toArray());
+        return $this->request('GET', '/posts?' . http_build_query($criteria->toArray()));
     }
 
     public function getPost($id)
