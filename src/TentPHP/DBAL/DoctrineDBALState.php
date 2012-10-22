@@ -205,6 +205,8 @@ class DoctrineDBALState implements ApplicationState
                 $this->conn->insert('tentc_user_authorizations', $data);
             }
 
+            $this->conn->commit();
+
         } catch(\Exception $e) {
             $this->conn->rollback();
             throw $e;
