@@ -53,7 +53,7 @@ class EntityDiscovery
 
         foreach ($links as $link) {
             if (preg_match('(<([^>]+)>; rel="https://tent.io/rels/profile")', $link, $match)) {
-                $profiles[] = $match[1];
+                $profiles[] = $this->normalizeUrl($match[1], $entityUrl);
             }
         }
 
@@ -79,6 +79,30 @@ class EntityDiscovery
         }
 
         return $servers;
+    }
+
+    /**
+     * Given a url and the parent resource url that contains that first url,
+     * make sure the url is normalized to an absolute url.
+     *
+     * @param string $url
+     * @param string $parentUrl
+     *
+     * @return string
+     */
+    private function normalizeUrl($url, $parentUrl)
+    {
+        if (strpos($url, "http") === false) {
+            if (substr($url, 0, 1) !== "/") {
+                return $parentUrl . $url;
+            }
+
+            $parts = parse_url($entityUrl);
+            $port  = isset($parts['port']) ? ":" . $parts['port'] : "";
+            $url   = $parts['scheme'] . "://" . $parts['host'] . $port . $parentUrl;
+        }
+
+        return $url;
     }
 }
 
