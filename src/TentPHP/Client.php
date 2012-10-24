@@ -58,25 +58,12 @@ class Client
      */
     public function getUserClient($entityUrl)
     {
-        $servers  = $this->state->getServers($entityUrl);
         $userAuthorization = null;
+        $firstServerUrl    = $this->getFirstServerUrl($entityUrl);
+        $config            = $this->state->getApplicationConfig($firstServerUrl, $this->application);
 
-        if ( ! $servers) {
-            throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
-        }
-
-        $firstServerUrl = array_shift($servers);
-
-        $config = $this->state->getApplicationConfig($firstServerUrl, $this->application);
-
-        if (!$config) {
-            throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
-        }
-
-        $userAuthorization = $this->state->getUserAuthorization($entityUrl, $config);
-
-        if ( !$userAuthorization) {
-            throw new \RuntimeException("User " . $entityUrl . " has not authorized the application yet.");
+        if ($config) {
+            $userAuthorization = $this->state->getUserAuthorization($entityUrl, $config);
         }
 
         return new UserClient($this->httpClient, $firstServerUrl, $userAuthorization);

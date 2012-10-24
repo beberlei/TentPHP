@@ -13,7 +13,7 @@ class UserClient
     private $serverUrl;
     private $userAuthorization;
 
-    public function __construct(HttpClient $client, $serverUrl, UserAuthorization $userAuthorization)
+    public function __construct(HttpClient $client, $serverUrl, UserAuthorization $userAuthorization = null)
     {
         $this->httpClient        = $client;
         $this->serverUrl         = $serverUrl;
@@ -116,18 +116,19 @@ class UserClient
         $payload = $body ? json_encode($body) : null;
         $url     = $this->serverUrl . $url;
 
-        $auth = HmacHelper::generateAuthorizationHeader(
-            $method,
-            $url,
-            $this->userAuthorization->getAccessToken(),
-            $this->userAuthorization->getMacKey()
-        );
-
         $headers = array(
             'Content-Type'  => 'application/vnd.tent.v0+json',
             'Accept'        => 'application/vnd.tent.v0+json',
-            'Authorization' => $auth,
         );
+
+        if ($this->userAuthorization) {
+            $headers['Authorization'] = HmacHelper::generateAuthorizationHeader(
+                $method,
+                $url,
+                $this->userAuthorization->getAccessToken(),
+                $this->userAuthorization->getMacKey()
+            );
+        }
 
         $response = $this->httpClient->createRequest($method, $url, $headers, $payload)->send();
 
