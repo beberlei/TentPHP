@@ -222,17 +222,5 @@ class Client
 
         return $this->appRegistration->update($this->application, $config, $serverUrl);
     }
-
-    private function getFirstServerUrl($entityUrl)
-    {
-        $servers = $this->state->getServers($entityUrl);
-
-        if ( ! $servers) {
-            $servers = $this->discovery->discoverServers($entityUrl);
-            $this->state->saveServers($entityUrl, $servers);
-        }
-
-        return array_shift($servers);
-    }
 }
 
