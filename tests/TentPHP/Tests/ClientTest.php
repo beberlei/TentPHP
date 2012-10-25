@@ -51,7 +51,7 @@ class ClientTest extends TestCase
         $userStorage->shouldReceive('save')->with(\Mockery::type('TentPHP\User'));
 
         $httpClient = new HttpClient();
-        $client = new Client($app, $httpClient, $state, null, $appRegistration, $userStorage);
+        $client = new Client($app, $httpClient, $userStorage, $state, null, $appRegistration);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
         $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
@@ -83,7 +83,7 @@ class ClientTest extends TestCase
         $userStorage->shouldReceive('save')->with(\Mockery::type('TentPHP\User'));
 
         $httpClient = new HttpClient();
-        $client = new Client($app, $httpClient, $state, $discovery, $appRegistration, $userStorage);
+        $client = new Client($app, $httpClient, $userStorage, $state, $discovery, $appRegistration);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
         $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
@@ -120,7 +120,7 @@ JSON
         $httpClient = new HttpClient();
         $httpClient->addSubscriber($httpMocks);
 
-        $client = new Client($app, $httpClient, $state, null, null, $userStorage);
+        $client = new Client($app, $httpClient, $userStorage, $state, null, null);
         $client->authorize('abcdefg', 'hijklmn');
     }
 
@@ -139,7 +139,7 @@ JSON
         $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn($user);
 
         $httpClient = new HttpClient();
-        $client = new Client($app, $httpClient, $state, null, null, $userStorage);
+        $client = new Client($app, $httpClient, $userStorage, $state, null, null);
 
         $userClient = $client->getUserClient(self::ENTITYURL);
 

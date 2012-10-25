@@ -39,17 +39,17 @@ class Client
     public function __construct(
         Application $application,
         HttpClient $httpClient,
-        ApplicationState $state,
+        UserStorage $userStorage,
+        ApplicationState $state = null,
         EntityDiscovery $discovery = null,
-        AppRegistration $appRegistration = null,
-        UserStorage $userStorage = null)
+        AppRegistration $appRegistration = null)
     {
         $this->application     = $application;
         $this->httpClient      = $httpClient;
-        $this->state           = $state;
+        $this->userStorage     = $userStorage;
+        $this->state           = $state ?: new PhpSessionState();
         $this->discovery       = $discovery ?: new EntityDiscovery($httpClient);
         $this->appRegistration = $appRegistration ?: new AppRegistration($httpClient);
-        $this->userStorage     = $userStorage;
     }
 
     /**

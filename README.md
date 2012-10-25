@@ -77,7 +77,7 @@ $conn = DriverManager::getConnection(array(
 ));
 $userStorage = new DoctrineUserStorage($conn);
 $state = new PhpSessionState();
-$client = new Client($application, $httpClient, $state, null, null $userStorage);
+$client = new Client($application, $httpClient, $userStorage, $state);
 ```
 
 ### Request Login URL for User
