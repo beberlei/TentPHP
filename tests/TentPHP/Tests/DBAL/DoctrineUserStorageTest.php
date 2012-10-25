@@ -44,5 +44,21 @@ class DoctrineUserStorageTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($loadedUser);
         $this->assertEquals($loadedUser, $user);
     }
+
+    public function testUserInsertThenUpdate()
+    {
+        $user = new User("lala");
+
+        $user->serverUrl       = "server";
+        $user->appId           = 1234;
+        $user->appMacKey       = "abdecf";
+        $user->appMacSecret    = "lj";
+        $user->appMacAlgorithm = "sha-256";
+
+        $this->userStorage->save($user);
+        $this->userStorage->save($user);
+        $loadedUser = $this->userStorage->load("lala");
+        $this->userStorage->save($user);
+    }
 }
 
