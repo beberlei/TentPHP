@@ -87,16 +87,16 @@ class Client
 
         list($entityUrl, $serverUrl) = $data;
 
-        $config  = $this->state->getApplicationConfig($serverUrl, $this->application);
+        $user = $this->userStorage->load($entityUrl);
 
-        if (!$config) {
+        if (!$user) {
             throw new \RuntimeException("Could not find application config for " . $serverUrl);
         }
 
-        $url      = $serverUrl . "/apps/" . $config->getApplicationId() . "/authorizations";
+        $url      = $serverUrl . "/apps/" . $user->appId . "/authorizations";
         $payload  = json_encode(array('code' => $code, 'token_type' => 'mac'));
 
-        $auth = HmacHelper::generateAuthorizationHeader('POST', $url, $config->getMacKeyId(), $config->getMacKey());
+        $auth = HmacHelper::generateAuthorizationHeader('POST', $url, $user->appMacKey, $user->appMacSecret);
 
         $headers = array(
             'Content-Type'  => 'application/vnd.tent.v0+json',
@@ -107,7 +107,12 @@ class Client
         $response = $this->httpClient->post($url, $headers, $payload)->send();
 
         $userAuthorization = json_decode($response->getBody(), true);
-        $this->state->saveUserAuthorization($entityUrl, $config, new UserAuthorization($userAuthorization));
+
+        $user->macKey       = $userAuthorization['access_token'];
+        $user->macSecret    = $userAuthorization['mac_key'];
+        $user->macAlgorithm = $userAuthorization['mac_algorithm'];
+
+        $this->userStorage->save($user);
 
         return $entityUrl;
     }

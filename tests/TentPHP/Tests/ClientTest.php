@@ -97,17 +97,14 @@ class ClientTest extends TestCase
             "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
 
-        $config = new ApplicationConfig(array(
-            'id'            => 'e12345',
-            'mac_key_id'    => 'ab1234',
-            'mac_key'       => 'abcdefg',
-            'mac_algorithm' => 'hmac-sha-256',
-        ));
+        $user = new \TentPHP\User(self::ENTITYURL);
+
+        $userStorage = $this->mock('TentPHP\UserStorage');
+        $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn($user);
+        $userStorage->shouldReceive('save')->with(\Mockery::type('TentPHP\User'));
 
         $state = $this->mock('TentPHP\ApplicationState');
         $state->shouldReceive('popStateToken')->with('abcdefg')->andReturn(array(self::ENTITYURL, self::SERVERURL));
-        $state->shouldReceive('getApplicationConfig')->with(self::SERVERURL, $app)->andReturn($config);
-        $state->shouldReceive('saveUserAuthorization')->times(1)->with(self::ENTITYURL, $config, \Mockery::type('TentPHP\UserAuthorization'));
 
         $httpMocks = new MockPlugin();
         $httpMocks->addResponse(new Response(200, null, <<<JSON
@@ -123,7 +120,7 @@ JSON
         $httpClient = new HttpClient();
         $httpClient->addSubscriber($httpMocks);
 
-        $client = new Client($app, $httpClient, $state);
+        $client = new Client($app, $httpClient, $state, null, null, $userStorage);
         $client->authorize('abcdefg', 'hijklmn');
     }
 
