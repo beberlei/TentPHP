@@ -34,26 +34,24 @@ class ClientTest extends TestCase
             "redirect_uris" => array("http://example.com/redirect"),
             "scopes"        => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
-        $config = new ApplicationConfig(array(
-            'id'            => 'e12345',
-            'mac_key_id'    => 'ab1234',
-            'mac_key'       => 'abcdefg',
-            'mac_algorithm' => 'hmac-sha-256',
-        ));
+
+        $appRegistration = $this->mock('TentPHP\Server\AppRegistration');
+        $appRegistration->shouldReceive('register')
+                        ->with($app, \Mockery::type('TentPHP\User'));
 
         $state = $this->mock('TentPHP\ApplicationState');
-        $state->shouldReceive('getServers')->with(self::ENTITYURL)->andReturn(array(self::SERVERURL));
-        $state->shouldReceive('saveServers')->times(0);
-        $state->shouldReceive('getApplicationConfig')->with(self::SERVERURL, $app)->andReturn($config);
-        $state->shouldReceive('saveApplicationConfig')->times(0);
         $state->shouldReceive('pushStateToken')->times(1);
 
+        $user = new \TentPHP\User(self::ENTITYURL);
+        $user->appId     = 'e12345';
+        $user->serverUrl = 'https://beberlei.tent.is/tent';
+
         $userStorage = $this->mock('TentPHP\UserStorage');
-        $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn(null);
+        $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn($user);
         $userStorage->shouldReceive('save')->with(\Mockery::type('TentPHP\User'));
 
         $httpClient = new HttpClient();
-        $client = new Client($app, $httpClient, $state, null, null, $userStorage);
+        $client = new Client($app, $httpClient, $state, null, $appRegistration, $userStorage);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
         $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
@@ -66,18 +64,8 @@ class ClientTest extends TestCase
             "redirect_uris" => array("http://example.com/redirect"),
             "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
-        $config = new ApplicationConfig(array(
-            'id'            => 'e12345',
-            'mac_key_id'    => 'ab1234',
-            'mac_key'       => 'abcdefg',
-            'mac_algorithm' => 'hmac-sha-256',
-        ));
 
         $state = $this->mock('TentPHP\ApplicationState');
-        $state->shouldReceive('getServers')->with(self::ENTITYURL)->andReturn(false);
-        $state->shouldReceive('saveServers')->with(self::ENTITYURL, array(self::SERVERURL));
-        $state->shouldReceive('getApplicationConfig')->with(self::SERVERURL, $app);
-        $state->shouldReceive('saveApplicationConfig')->with(self::SERVERURL, $app, $config);
         $state->shouldReceive('pushStateToken')->times(1);
 
         $discovery = $this->mock('TentPHP\Server\EntityDiscovery');
@@ -87,8 +75,8 @@ class ClientTest extends TestCase
 
         $appRegistration = $this->mock('TentPHP\Server\AppRegistration');
         $appRegistration->shouldReceive('register')
-                        ->with($app, self::SERVERURL)
-                        ->andReturn($config);
+                        ->times(1)
+                        ->with($app, \Mockery::type('TentPHP\User'));
 
         $userStorage = $this->mock('TentPHP\UserStorage');
         $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn(null);
@@ -98,7 +86,7 @@ class ClientTest extends TestCase
         $client = new Client($app, $httpClient, $state, $discovery, $appRegistration, $userStorage);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
-        $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
+        $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
     }
 
     public function testAuthorize()

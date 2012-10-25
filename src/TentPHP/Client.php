@@ -135,30 +135,25 @@ class Client
         $user = $this->userStorage->load($entityUrl);
 
         if (!$user) {
-            $user            = new User($entityUrl);
-            $servers         = $this->discovery->discoverServers($entityUrl);
+            $user    = new User($entityUrl);
+            $servers = $this->discovery->discoverServers($entityUrl);
+
             $user->serverUrl = array_shift($servers);
         }
 
-        $firstServerUrl = $this->getFirstServerUrl($entityUrl);
-        $config         = $this->getApplicationConfig($firstServerUrl);
-
         if ( ! $user->appId) {
-            $user->appId           = $config->getApplicationId();
-            $user->appMacKey       = $config->getMacKeyId();
-            $user->appMacSecret    = $config->getMacKey();
-            $user->appMacAlgorithm = $config->getMacAlgorithm();
+            $this->appRegistration->register($this->application, $user);
         }
 
         $state  = str_replace(array('/', '+', '='), '', base64_encode(openssl_random_pseudo_bytes(64)));
         $params = array(
-            'client_id'    => $config->getApplicationId(),
+            'client_id'    => $user->appId,
             'redirect_uri' => $redirectUri ?: $this->application->getFirstRedirectUri(),
             'scope'        => implode(",", $scopes ?: array_keys($this->application->getScopes())),
             'state'        => $state,
         );
 
-        $this->state->pushStateToken($state, $entityUrl, $firstServerUrl);
+        $this->state->pushStateToken($state, $entityUrl, $user->serverUrl);
 
         if ($infoTypes) {
             $params['tent_profile_info_types'] = is_array($infoTypes) ? implode(",", $infoTypes) : $infoTypes;
@@ -179,7 +174,7 @@ class Client
 
         return sprintf(
             '%s/oauth/authorize?%s',
-            $firstServerUrl,
+            $user->serverUrl,
             http_build_query($params)
         );
     }

@@ -5,6 +5,7 @@ namespace TentPHP\Server;
 use TentPHP\Application;
 use TentPHP\ApplicationConfig;
 use TentPHP\HmacHelper;
+use TentPHP\User;
 
 use Guzzle\Http\Client as HttpClient;
 use Guzzle\Http\Exception\ClientErrorResponseException;
@@ -26,11 +27,11 @@ class AppRegistration
      * exists. This is done at other levels.
      *
      * @param Application $application
-     * @param string $serverUrl
+     * @param User $user
      *
-     * @return ApplicationConfig
+     * @return void
      */
-    public function register(Application $application, $serverUrl)
+    public function register(Application $application, User $user)
     {
         $payload = json_encode($application->toArray());
         $headers = array(
@@ -39,7 +40,7 @@ class AppRegistration
         );
 
         try {
-            $response  = $this->httpClient->post(rtrim($serverUrl, '/') . '/apps', $headers, $payload)->send();
+            $response  = $this->httpClient->post(rtrim($user->serverUrl, '/') . '/apps', $headers, $payload)->send();
         } catch(ServerErrorResponseException $e) {
             throw new \RuntimeException("Error registering application: " . $e->getMessage(), 0, $e);
         } catch(ClientErrorResponseException $e) {
@@ -47,8 +48,12 @@ class AppRegistration
         }
 
         $appConfig = json_decode($response->getBody(), true);
+        $config    = new ApplicationConfig($appConfig);
 
-        return new ApplicationConfig($appConfig);
+        $user->appId           = $config->getApplicationId();
+        $user->appMacKey       = $config->getMacKeyId();
+        $user->appMacSecret    = $config->getMacKey();
+        $user->appMacAlgorithm = $config->getMacAlgorithm();
     }
 
     /**

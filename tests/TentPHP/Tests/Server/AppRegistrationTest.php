@@ -4,6 +4,7 @@ namespace TentPHP\Tests\Server;
 
 use TentPHP\Tests\TestCase;
 use TentPHP\Application;
+use TentPHP\User;
 use TentPHP\Server\AppRegistration;
 use Guzzle\Plugin\Mock\MockPlugin;
 use Guzzle\Http\Message\Response;
@@ -39,13 +40,13 @@ JSON
             "name" => "Test Application",
         ));
 
-        $config = $this->appRegistration->register($application, 'https://tent.is/tent');
+        $user = new User('https://tent.is/tent');
+        $this->appRegistration->register($application, $user);
 
-        $this->assertInstanceOf('TentPHP\ApplicationConfig', $config);
-        $this->assertEquals('326ee3', $config->getApplicationId());
-        $this->assertEquals('a:02ddb3b8', $config->getMacKeyId());
-        $this->assertEquals('1bdaa909e7e1254d41c102775b20c605', $config->getMacKey());
-        $this->assertEquals('hmac-sha-256', $config->getMacAlgorithm());
+        $this->assertEquals('326ee3', $user->appId);
+        $this->assertEquals('a:02ddb3b8', $user->appMacKey);
+        $this->assertEquals('1bdaa909e7e1254d41c102775b20c605', $user->appMacSecret);
+        $this->assertEquals('hmac-sha-256', $user->appMacAlgorithm);
     }
 }
 
