@@ -49,7 +49,8 @@ Use Composer to install TentPHP and all its dependencies:
 <?php
 use TentPHP\Application;
 use TentPHP\Client;
-use TentPHP\DBAL\DoctrineDBALState;
+use TentPHP\PhpSessionState;
+use TentPHP\DBAL\DoctrineUserStorage;
 use Doctrine\DBAL\DriverManager;
 use Guzzle\Http\Client as HttpClient;
 
@@ -74,8 +75,9 @@ $conn = DriverManager::getConnection(array(
     'username' => 'user',
     'password' => 'pw',
 ));
-$state = new DoctrineDBALState($conn);
-$client = new Client($application, $httpClient, $state);
+$userStorage = new DoctrineUserStorage($conn);
+$state = new PhpSessionState();
+$client = new Client($application, $httpClient, $state, null, null $userStorage);
 ```
 
 ### Request Login URL for User
