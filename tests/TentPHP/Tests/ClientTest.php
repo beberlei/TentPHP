@@ -135,20 +135,14 @@ JSON
             "scopes"       => array('read_profile' => 'Read profile sections listed in the profile_info parameter')
         ));
 
-        $config = new ApplicationConfig(array(
-            'id'            => 'e12345',
-            'mac_key_id'    => 'ab1234',
-            'mac_key'       => 'abcdefg',
-            'mac_algorithm' => 'hmac-sha-256',
-        ));
-
         $state = $this->mock('TentPHP\ApplicationState');
-        $state->shouldReceive('getServers')->times(1)->with(self::ENTITYURL)->andReturn(array(self::SERVERURL));
-        $state->shouldReceive('getApplicationConfig')->times(1)->andReturn($config);
-        $state->shouldReceive('getUserAuthorization')->times(1)->with(self::ENTITYURL, $config)->andReturn(new UserAuthorization(array()));
+
+        $user = new \TentPHP\User(self::ENTITYURL);
+        $userStorage = $this->mock('TentPHP\UserStorage');
+        $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn($user);
 
         $httpClient = new HttpClient();
-        $client = new Client($app, $httpClient, $state);
+        $client = new Client($app, $httpClient, $state, null, null, $userStorage);
 
         $userClient = $client->getUserClient(self::ENTITYURL);
 

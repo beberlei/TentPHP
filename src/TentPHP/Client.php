@@ -61,15 +61,9 @@ class Client
      */
     public function getUserClient($entityUrl)
     {
-        $userAuthorization = null;
-        $firstServerUrl    = $this->getFirstServerUrl($entityUrl);
-        $config            = $this->state->getApplicationConfig($firstServerUrl, $this->application);
+        $user = $this->userStorage->load($entityUrl);
 
-        if ($config) {
-            $userAuthorization = $this->state->getUserAuthorization($entityUrl, $config);
-        }
-
-        return new UserClient($this->httpClient, $firstServerUrl, $userAuthorization);
+        return new UserClient($this->httpClient, $user);
     }
 
     /**
@@ -182,20 +176,20 @@ class Client
     /**
      * Get application details saved on the given tent server.
      *
-     * @param string $serverUrl
+     * @param string $entityUrl
      *
      * @return array
      */
-    public function getApplication($serverUrl)
+    public function getApplication($entityUrl)
     {
-        $config  = $this->state->getApplicationConfig($serverUrl, $this->application);
+        $user = $this->userStorage->load($entityUrl);
 
-        if (!$config) {
+        if (!$user->appId) {
             throw new \RuntimeException("Could not find application config for " . $serverUrl);
         }
 
-        $url  = $serverUrl . "/apps/" . $config->getApplicationId();
-        $auth = HmacHelper::generateAuthorizationHeader('GET', $url, $config->getMacKeyId(), $config->getMacKey());
+        $url  = $serverUrl . "/apps/" . $user->appId;
+        $auth = HmacHelper::generateAuthorizationHeader('GET', $url, $user->appMacKey, $user->appMacSecret);
 
         $headers = array(
             'Content-Type'  => 'application/vnd.tent.v0+json',
@@ -211,13 +205,13 @@ class Client
     /**
      * Update the application with the current data on the given server.
      *
-     * @param string $serverUrl
+     * @param string $entityUrl
      */
-    public function updateApplication($serverUrl)
+    public function updateApplication($entityUrl)
     {
-        $config  = $this->state->getApplicationConfig($serverUrl, $this->application);
+        $user = $this->userStorage->load($entityUrl);
 
-        if (!$config) {
+        if (!$user->appId) {
             throw new \RuntimeException("Could not find application config for " . $serverUrl);
         }
 
@@ -234,18 +228,6 @@ class Client
         }
 
         return array_shift($servers);
-    }
-
-    private function getApplicationConfig($serverUrl)
-    {
-        $config = $this->state->getApplicationConfig($serverUrl, $this->application);
-
-        if (!$config) {
-            $config = $this->appRegistration->register($this->application, $serverUrl);
-            $this->state->saveApplicationConfig($serverUrl, $this->application, $config);
-        }
-
-        return $config;
     }
 }
 

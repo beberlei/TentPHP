@@ -64,11 +64,12 @@ class AppRegistration
      * @param string $serverUrl
      * @return ApplicationConfig
      */
-    public function update(Application $application, ApplicationConfig $config, $serverUrl)
+    public function update(Application $application, User $user, $serverUrl)
     {
         $payload = json_encode($application->toArray());
-        $url     = rtrim($serverUrl, '/') . '/apps/' . $config->getApplicationId();
-        $auth    = HmacHelper::generateAuthorizationHeader('PUT', $url, $config->getMacKeyId(), $config->getMacKey());
+        $url     = rtrim($serverUrl, '/') . '/apps/' . $user->appId;
+        $auth    = HmacHelper::generateAuthorizationHeader('PUT', $url, $user->appMacKey, $user->appMacSecret);
+
         $headers = array(
             'Content-Type'  => 'application/vnd.tent.v0+json',
             'Accept'        => 'application/vnd.tent.v0+json',
