@@ -46,19 +46,19 @@ class DoctrineUserStorage implements UserStorage
      * @var array
      */
     private $fieldMappings = array(
-        'entityUrl'        => array('columnName' => 'entity_url', 'type' => 'string'),
+        'entity'           => array('columnName' => 'entity', 'type' => 'string'),
         'serverUrl'        => array('columnName' => 'server_url', 'type' => 'string'),
         'appId'            => array('columnName' => 'app_id', 'type' => 'string'),
         'appMacKey'        => array('columnName' => 'app_mac_key', 'type' => 'string'),
         'appMacSecret'     => array('columnName' => 'app_mac_secret', 'type' => 'string'),
         'appMacAlgorithm'  => array('columnName' => 'app_mac_algorithm', 'type' => 'string'),
-        'macKey'           => array('columnName' => 'mac_key', 'type' => 'string'),
-        'macSecret'        => array('columnName' => 'mac_secret', 'type' => 'string'),
-        'macAlgorithm'     => array('columnName' => 'mac_algorithm', 'type' => 'string'),
-        'tokenType'        => array('columnName' => 'token_type', 'type' => 'string'),
-        'profileInfoTypes' => array('columnName' => 'profile_info_types', 'type' => 'json'),
-        'postTypes'        => array('columnName' => 'post_types', 'type' => 'json'),
-        'notificationUrl'  => array('columnName' => 'notification_url', 'type' => 'string'),
+        'macKey'           => array('columnName' => 'mac_key', 'type' => 'string', 'options' => array('notnull' => false)),
+        'macSecret'        => array('columnName' => 'mac_secret', 'type' => 'string', 'options' => array('notnull' => false)),
+        'macAlgorithm'     => array('columnName' => 'mac_algorithm', 'type' => 'string', 'options' => array('notnull' => false)),
+        'tokenType'        => array('columnName' => 'token_type', 'type' => 'string', 'options' => array('notnull' => false)),
+        'profileInfoTypes' => array('columnName' => 'profile_info_types', 'type' => 'json_array', 'options' => array('notnull' => false)),
+        'postTypes'        => array('columnName' => 'post_types', 'type' => 'json_array', 'options' => array('notnull' => false)),
+        'notificationUrl'  => array('columnName' => 'notification_url', 'type' => 'string', 'options' => array('notnull' => false)),
     );
 
     public function __construct(Connection $conn)
@@ -75,8 +75,8 @@ class DoctrineUserStorage implements UserStorage
      */
     public function load($entityUrl)
     {
-        $sql = "SELECT * FROM tentc_user WHERE entity_url = ?";
-        $row = $this->conn->fetchAssoc($entityUrl);
+        $sql = "SELECT * FROM tentc_user WHERE entity = ?";
+        $row = $this->conn->fetchAssoc($sql, array($entityUrl));
 
         if ( ! $row) {
             return null;
@@ -88,12 +88,12 @@ class DoctrineUserStorage implements UserStorage
         $user = new User($entityUrl);
 
         foreach ($this->fieldMappings as $fieldName => $mapping) {
-            $value = Type::getType($mapping['columnName'])
+            $value = Type::getType($mapping['type'])
                 ->convertToPHPValue($row[$mapping['columnName']], $this->platform);
             $user->$fieldName = $value;
         }
 
-        return $value;
+        return $user;
     }
 
     /**
@@ -143,11 +143,12 @@ class DoctrineUserStorage implements UserStorage
         $table->addColumn('id', 'integer', array('autoincrement' => true));
 
         foreach ($this->fieldMappings as $field => $mapping) {
-            $table->addColumn($mapping['columnName'], $mapping['type']);
+            $options = isset($mapping['options']) ? $mapping['options'] : array();
+            $table->addColumn($mapping['columnName'], $mapping['type'], $options);
         }
 
         $table->setPrimaryKey(array('id'));
-        $table->addUniqueIndex(array('entity_url'));
+        $table->addUniqueIndex(array('entity'));
     }
 }
 

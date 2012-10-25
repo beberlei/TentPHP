@@ -28,8 +28,8 @@ class User
     public $macSecret;
     public $macAlgorithm;
     public $tokenType;
-    public $profileInfoTypes;
-    public $postTypes;
+    public $profileInfoTypes = array();
+    public $postTypes = array();
     public $notificationUrl;
 
     public function __construct($entity)
