@@ -48,8 +48,11 @@ class ClientTest extends TestCase
         $state->shouldReceive('saveApplicationConfig')->times(0);
         $state->shouldReceive('pushStateToken')->times(1);
 
+        $userStorage = $this->mock('TentPHP\UserStorage');
+        $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn(null);
+
         $httpClient = new HttpClient();
-        $client = new Client($app, $httpClient, $state);
+        $client = new Client($app, $httpClient, $state, null, null, $userStorage);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
         $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);
@@ -86,8 +89,12 @@ class ClientTest extends TestCase
                         ->with($app, self::SERVERURL)
                         ->andReturn($config);
 
+
+        $userStorage = $this->mock('TentPHP\UserStorage');
+        $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn(null);
+
         $httpClient = new HttpClient();
-        $client = new Client($app, $httpClient, $state, $discovery, $appRegistration);
+        $client = new Client($app, $httpClient, $state, $discovery, $appRegistration, $userStorage);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 
         $this->assertStringStartsWith("https://beberlei.tent.is/tent/oauth/authorize?client_id=e12345&redirect_uri=http%3A%2F%2Fexample.com%2Fredirect&scope=read_profile&state=", $url);

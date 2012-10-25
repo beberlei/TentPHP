@@ -27,6 +27,7 @@ class Client
     private $discovery;
     private $appRegistration;
     private $state;
+    private $userStorage;
 
     /**
      * @param Application      $application
@@ -40,13 +41,15 @@ class Client
         HttpClient $httpClient,
         ApplicationState $state,
         EntityDiscovery $discovery = null,
-        AppRegistration $appRegistration = null)
+        AppRegistration $appRegistration = null,
+        UserStorage $userStorage = null)
     {
         $this->application     = $application;
         $this->httpClient      = $httpClient;
         $this->state           = $state;
         $this->discovery       = $discovery ?: new EntityDiscovery($httpClient);
         $this->appRegistration = $appRegistration ?: new AppRegistration($httpClient);
+        $this->userStorage     = $userStorage;
     }
 
     /**
@@ -129,6 +132,13 @@ class Client
      */
     public function getLoginUrl($entityUrl, array $scopes = null, $redirectUri = null, array $infoTypes = null, array $postTypes = null, $notificationUrl = null)
     {
+        $user = $this->userStorage->load($entityUrl);
+
+        if (!$user) {
+            $servers         = $this->discovery->discoverServers($entityUrl);
+            $user->serverUrl = array_shift($servers);
+        }
+
         $firstServerUrl = $this->getFirstServerUrl($entityUrl);
         $config         = $this->getApplicationConfig($firstServerUrl);
 
