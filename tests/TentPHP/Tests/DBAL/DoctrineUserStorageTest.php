@@ -57,7 +57,7 @@ class DoctrineUserStorageTest extends \PHPUnit_Framework_TestCase
 
         $this->userStorage->save($user);
         $this->userStorage->save($user);
-        $loadedUser = $this->userStorage->load("lala");
+        $user = $this->userStorage->load("lala");
         $this->userStorage->save($user);
     }
 }
