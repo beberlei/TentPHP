@@ -3,7 +3,6 @@
 namespace TentPHP\Server;
 
 use TentPHP\Application;
-use TentPHP\ApplicationConfig;
 use TentPHP\HmacHelper;
 use TentPHP\User;
 
@@ -48,26 +47,23 @@ class AppRegistration
         }
 
         $appConfig = json_decode($response->getBody(), true);
-        $config    = new ApplicationConfig($appConfig);
 
-        $user->appId           = $config->getApplicationId();
-        $user->appMacKey       = $config->getMacKeyId();
-        $user->appMacSecret    = $config->getMacKey();
-        $user->appMacAlgorithm = $config->getMacAlgorithm();
+        $user->appId           = $appConfig['id'];
+        $user->appMacKey       = $appConfig['mac_key_id'];
+        $user->appMacSecret    = $appConfig['mac_key'];
+        $user->appMacAlgorithm = $appConfig['mac_algorithm'];
     }
 
     /**
      * Update application details on the given server
      *
      * @param Application $application
-     * @param ApplicationConfig $config
-     * @param string $serverUrl
-     * @return ApplicationConfig
+     * @param User $user
      */
-    public function update(Application $application, User $user, $serverUrl)
+    public function update(Application $application, User $user)
     {
         $payload = json_encode($application->toArray());
-        $url     = rtrim($serverUrl, '/') . '/apps/' . $user->appId;
+        $url     = rtrim($user->serverUrl, '/') . '/apps/' . $user->appId;
         $auth    = HmacHelper::generateAuthorizationHeader('PUT', $url, $user->appMacKey, $user->appMacSecret);
 
         $headers = array(
