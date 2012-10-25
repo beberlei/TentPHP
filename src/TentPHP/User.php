@@ -31,5 +31,10 @@ class User
     public $profileInfoTypes;
     public $postTypes;
     public $notificationUrl;
+
+    public function __construct($entity)
+    {
+        $this->entity = $entity;
+    }
 }
 

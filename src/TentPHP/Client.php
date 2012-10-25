@@ -135,12 +135,20 @@ class Client
         $user = $this->userStorage->load($entityUrl);
 
         if (!$user) {
+            $user            = new User($entityUrl);
             $servers         = $this->discovery->discoverServers($entityUrl);
             $user->serverUrl = array_shift($servers);
         }
 
         $firstServerUrl = $this->getFirstServerUrl($entityUrl);
         $config         = $this->getApplicationConfig($firstServerUrl);
+
+        if ( ! $user->appId) {
+            $user->appId           = $config->getApplicationId();
+            $user->appMacKey       = $config->getMacKeyId();
+            $user->appMacSecret    = $config->getMacKey();
+            $user->appMacAlgorithm = $config->getMacAlgorithm();
+        }
 
         $state  = str_replace(array('/', '+', '='), '', base64_encode(openssl_random_pseudo_bytes(64)));
         $params = array(
@@ -154,15 +162,20 @@ class Client
 
         if ($infoTypes) {
             $params['tent_profile_info_types'] = is_array($infoTypes) ? implode(",", $infoTypes) : $infoTypes;
+            $user->profileTypes = $params['tent_profile_info_types'];
         }
 
         if ($postTypes) {
             $params['tent_post_types'] = is_array($postTypes) ? implode(",", $postTypes) : $postTypes;
+            $user->postTypes = $params['tent_post_types'];
         }
 
         if ($notificationUrl) {
             $params['tent_notification_url'] = $notificationUrl;
+            $user->notificationUrl = $notificationUrl;
         }
+
+        $this->userStorage->save($user);
 
         return sprintf(
             '%s/oauth/authorize?%s',

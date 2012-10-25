@@ -50,6 +50,7 @@ class ClientTest extends TestCase
 
         $userStorage = $this->mock('TentPHP\UserStorage');
         $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn(null);
+        $userStorage->shouldReceive('save')->with(\Mockery::type('TentPHP\User'));
 
         $httpClient = new HttpClient();
         $client = new Client($app, $httpClient, $state, null, null, $userStorage);
@@ -89,9 +90,9 @@ class ClientTest extends TestCase
                         ->with($app, self::SERVERURL)
                         ->andReturn($config);
 
-
         $userStorage = $this->mock('TentPHP\UserStorage');
         $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn(null);
+        $userStorage->shouldReceive('save')->with(\Mockery::type('TentPHP\User'));
 
         $httpClient = new HttpClient();
         $client = new Client($app, $httpClient, $state, $discovery, $appRegistration, $userStorage);
