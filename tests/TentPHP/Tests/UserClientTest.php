@@ -85,10 +85,6 @@ JSON
 
     public function testGetProfile()
     {
-        $userAuthorization = new UserAuthorization(array(
-            'mac_key'      => 'abcdefg',
-            'access_token' => 'hijklmn',
-        ));
         $mockPlugin = new MockPlugin();
         $mockPlugin->addResponse(new Response(200, null, <<<JSON
 {
@@ -122,7 +118,7 @@ JSON
         $httpClient = new HttpClient();
         $httpClient->addSubscriber($mockPlugin);
 
-        $userClient = new UserClient($httpClient, "https://beberlei.tent.is/tent", $userAuthorization);
+        $userClient = new UserClient($httpClient, "https://beberlei.tent.is/tent");
 
         $data = $userClient->getProfile();
 
