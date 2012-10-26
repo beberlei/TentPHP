@@ -75,7 +75,8 @@ $conn = DriverManager::getConnection(array(
     'username' => 'user',
     'password' => 'pw',
 ));
-$userStorage = new DoctrineUserStorage($conn);
+$encryptionKey = "abcdef12345";
+$userStorage = new DoctrineUserStorage($conn, $encryptionKey);
 $state = new PhpSessionState();
 $client = new Client($application, $httpClient, $userStorage, $state);
 ```
