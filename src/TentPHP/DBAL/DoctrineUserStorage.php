@@ -15,6 +15,7 @@ namespace TentPHP\DBAL;
 
 use TentPHP\UserStorage;
 use TentPHP\User;
+use TentPHP\Util\Encryption;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
@@ -49,11 +50,11 @@ class DoctrineUserStorage implements UserStorage
         'entity'           => array('columnName' => 'entity', 'type' => 'string'),
         'serverUrl'        => array('columnName' => 'server_url', 'type' => 'string'),
         'appId'            => array('columnName' => 'app_id', 'type' => 'string'),
-        'appMacKey'        => array('columnName' => 'app_mac_key', 'type' => 'string'),
-        'appMacSecret'     => array('columnName' => 'app_mac_secret', 'type' => 'string'),
+        'appMacKey'        => array('columnName' => 'app_mac_key', 'type' => 'tentecstring'),
+        'appMacSecret'     => array('columnName' => 'app_mac_secret', 'type' => 'tentecstring'),
         'appMacAlgorithm'  => array('columnName' => 'app_mac_algorithm', 'type' => 'string'),
-        'macKey'           => array('columnName' => 'mac_key', 'type' => 'string', 'options' => array('notnull' => false)),
-        'macSecret'        => array('columnName' => 'mac_secret', 'type' => 'string', 'options' => array('notnull' => false)),
+        'macKey'           => array('columnName' => 'mac_key', 'type' => 'tentecstring', 'options' => array('notnull' => false)),
+        'macSecret'        => array('columnName' => 'mac_secret', 'type' => 'tentecstring', 'options' => array('notnull' => false)),
         'macAlgorithm'     => array('columnName' => 'mac_algorithm', 'type' => 'string', 'options' => array('notnull' => false)),
         'tokenType'        => array('columnName' => 'token_type', 'type' => 'string', 'options' => array('notnull' => false)),
         'profileInfoTypes' => array('columnName' => 'profile_info_types', 'type' => 'json_array', 'options' => array('notnull' => false)),
@@ -61,10 +62,15 @@ class DoctrineUserStorage implements UserStorage
         'notificationUrl'  => array('columnName' => 'notification_url', 'type' => 'string', 'options' => array('notnull' => false)),
     );
 
-    public function __construct(Connection $conn)
+    public function __construct(Connection $conn, $encryptionKey)
     {
         $this->conn     = $conn;
         $this->platform = $conn->getDatabasePlatform();
+
+        if (!Type::hasType('tentecstring')) {
+            Type::addType('tentecstring', __NAMESPACE__ . '\\EncryptedString');
+        }
+        Type::getType('tentecstring')->setEncryption(new Encryption($encryptionKey));
     }
 
     /**
