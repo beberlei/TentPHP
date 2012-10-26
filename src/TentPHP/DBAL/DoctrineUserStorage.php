@@ -62,23 +62,22 @@ class DoctrineUserStorage implements UserStorage
         'notificationUrl'  => array('columnName' => 'notification_url', 'type' => 'string', 'options' => array('notnull' => false)),
     );
 
-    public function __construct(Connection $conn, $encryptionKey)
+    public function __construct(Connection $conn)
     {
         $this->conn     = $conn;
         $this->platform = $conn->getDatabasePlatform();
-
-        self::registerTentEncryptionStringType();
     }
 
     /**
      * Register Tent Encryption String
      */
-    static public function registerTentEncryptionStringType()
+    static public function registerTentEncryptionStringType($encryptionKey)
     {
         if (!Type::hasType('tentecstring')) {
             Type::addType('tentecstring', __NAMESPACE__ . '\\EncryptedString');
-            Type::getType('tentecstring')->setEncryption(new Encryption($encryptionKey));
         }
+
+        Type::getType('tentecstring')->setEncryption(new Encryption($encryptionKey));
     }
 
     /**

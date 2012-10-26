@@ -76,9 +76,11 @@ $conn = DriverManager::getConnection(array(
     'password' => 'pw',
 ));
 $encryptionKey = "abcdef12345";
-$userStorage = new DoctrineUserStorage($conn, $encryptionKey);
-$state = new PhpSessionState();
-$client = new Client($application, $httpClient, $userStorage, $state);
+DoctrineUserStorage::registerTentEncryptionStringType($encryptionKey);
+
+$userStorage = new DoctrineUserStorage($conn);
+$state       = new PhpSessionState();
+$client      = new Client($application, $httpClient, $userStorage, $state);
 ```
 
 ### Request Login URL for User

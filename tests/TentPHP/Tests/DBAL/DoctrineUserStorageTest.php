@@ -14,7 +14,8 @@ class DoctrineUserStorageTest extends \PHPUnit_Framework_TestCase
             'driver' => 'pdo_sqlite',
             'memory' => true,
         ));
-        $this->userStorage = new DoctrineUserStorage($this->conn, "key");
+        $this->userStorage = new DoctrineUserStorage($this->conn);
+        DoctrineUserStorage::registerTentEncryptionStringType("key");
 
         $schema = $this->userStorage->createSchema();
         foreach ($schema->toSQL($this->conn->getDatabasePlatform()) as $sql) {
