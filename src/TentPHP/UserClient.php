@@ -134,5 +134,16 @@ class UserClient
 
         return json_decode($response->getBody(), true);
     }
+
+    /**
+     * Validate given the url of the current request that a MAC authorization
+     * header was passed that matches to the current entity authorization details.
+     *
+     * @throws RuntimeException
+     */
+    public function validateMacAuthorizationHeader($url, $method = 'POST')
+    {
+        HmacHelper::validateMacAuthorizationHeader($this->user, $url, $method);
+    }
 }
 
