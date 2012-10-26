@@ -67,10 +67,18 @@ class DoctrineUserStorage implements UserStorage
         $this->conn     = $conn;
         $this->platform = $conn->getDatabasePlatform();
 
+        self::registerTentEncryptionStringType();
+    }
+
+    /**
+     * Register Tent Encryption String
+     */
+    static public function registerTentEncryptionStringType()
+    {
         if (!Type::hasType('tentecstring')) {
             Type::addType('tentecstring', __NAMESPACE__ . '\\EncryptedString');
+            Type::getType('tentecstring')->setEncryption(new Encryption($encryptionKey));
         }
-        Type::getType('tentecstring')->setEncryption(new Encryption($encryptionKey));
     }
 
     /**
