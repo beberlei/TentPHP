@@ -11,13 +11,13 @@ class UserClient
 {
     private $httpClient;
     private $serverUrl;
-    private $userAuthorization;
+    private $user;
 
-    public function __construct(HttpClient $client, $serverUrl, UserAuthorization $userAuthorization = null)
+    public function __construct(HttpClient $client, $serverUrl, User $user = null)
     {
-        $this->httpClient        = $client;
-        $this->serverUrl         = $serverUrl;
-        $this->userAuthorization = $userAuthorization;
+        $this->httpClient = $client;
+        $this->serverUrl  = $serverUrl;
+        $this->user       = $user;
     }
 
     public function getProfile()
@@ -121,12 +121,12 @@ class UserClient
             'Accept'        => 'application/vnd.tent.v0+json',
         );
 
-        if ($this->userAuthorization) {
+        if ($this->user) {
             $headers['Authorization'] = HmacHelper::generateAuthorizationHeader(
                 $method,
                 $url,
-                $this->userAuthorization->getAccessToken(),
-                $this->userAuthorization->getMacKey()
+                $this->user->macKey,
+                $this->user->macSecret
             );
         }
 

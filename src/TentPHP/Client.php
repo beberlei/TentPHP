@@ -63,7 +63,14 @@ class Client
     {
         $user = $this->userStorage->load($entityUrl);
 
-        return new UserClient($this->httpClient, $user);
+        if (!$user) {
+            $servers   = $this->discovery->discoverServers($entityUrl);
+            $serverUrl = array_shift($servers);
+        } else {
+            $serverUrl = $user->serverUrl;
+        }
+
+        return new UserClient($this->httpClient, $serverUrl, $user);
     }
 
     /**
