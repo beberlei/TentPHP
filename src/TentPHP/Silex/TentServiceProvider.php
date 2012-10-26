@@ -18,6 +18,8 @@ use Silex\ServiceProviderInterface;
 use TentPHP\Application as TentApplication;
 use TentPHP\DBAL\DoctrineUserStorage;
 use TentPHP\Silex\SymfonySessionState;
+use TentPHP\Client;
+use Guzzle\Http\Client as HttpClient;
 
 class TentServiceProvider implements ServiceProviderInterface
 {
@@ -32,9 +34,9 @@ class TentServiceProvider implements ServiceProviderInterface
         });
 
         $app['tent.client'] = $app->share(function($app) {
-            $httpClient = new Guzzle\Http\Client();
+            $httpClient = new HttpClient();
 
-            return new TentPHP\Client(
+            return new Client(
                 $app['tent.application'],
                 $httpClient,
                 $app['tent.user_storage'],
