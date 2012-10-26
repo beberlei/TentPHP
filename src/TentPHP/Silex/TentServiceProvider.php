@@ -46,5 +46,9 @@ class TentServiceProvider implements ServiceProviderInterface
             return new SymfonySessionState($app['session']);
         });
     }
+
+    public function boot(Application $app)
+    {
+    }
 }
 
