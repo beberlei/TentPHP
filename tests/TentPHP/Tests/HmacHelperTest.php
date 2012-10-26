@@ -29,5 +29,21 @@ class HmacHelperTest extends TestCase
         $nonce = 'dj83hs9s';
         $this->assertEquals($expected, HmacHelper::getAuthorizationHeader($method, $url, $macKeyId, $macKey, $time, $nonce));
     }
+
+    public function testParseMacAuthorizationHeader()
+    {
+        $auth = HmacHelper::parseMacAuthorizationHeader('MAC id="a:f72404a9", ts="1350831026", nonce="0ce437", mac="3heLNevLWzVqWHAtgiG950vCX7yFpkQAzxyQjocC/G0=');
+
+        $this->assertEquals('a:f72404a9', $auth['id']);
+        $this->assertEquals('1350831026', $auth['ts']);
+        $this->assertEquals('0ce437', $auth['nonce']);
+        $this->assertEquals('3heLNevLWzVqWHAtgiG950vCX7yFpkQAzxyQjocC/G0=', $auth['mac']);
+    }
+
+    public function testParseInvalidMAcAuthorizationHeader()
+    {
+        $this->setExpectedException('RuntimeException');
+        HmacHelper::parseMacAuthorizationHeader("invalid");
+    }
 }
 
