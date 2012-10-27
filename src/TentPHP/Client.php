@@ -16,6 +16,7 @@ namespace TentPHP;
 use TentPHP\Server\AppRegistration;
 use TentPHP\Server\EntityDiscovery;
 use Guzzle\Http\Client as HttpClient;
+use Guzzle\Common\Exception\GuzzleException;
 
 /**
  * Tent.io Client
