@@ -50,7 +50,12 @@ class ClientTest extends TestCase
         $userStorage->shouldReceive('load')->with(self::ENTITYURL)->andReturn($user);
         $userStorage->shouldReceive('save')->with(\Mockery::type('TentPHP\User'));
 
+        $httpMocks = new MockPlugin();
+        $httpMocks->addResponse(new Response(200, null,'{}'));
+
         $httpClient = new HttpClient();
+        $httpClient->addSubscriber($httpMocks);
+
         $client = new Client($app, $httpClient, $userStorage, $state, null, $appRegistration);
         $url    = $client->getLoginUrl(self::ENTITYURL);
 

@@ -140,7 +140,13 @@ class Client
     {
         $user = $this->userStorage->load($entityUrl);
 
-        if (!$user) {
+        if ($user) {
+            try {
+                $this->getApplication($entityUrl);
+            } catch(GuzzleException $e) {
+                $user->appId = $user->appMacKey = $user->appMacSecret = $user->appMacAlgorithm = null;
+            }
+        } else {
             $user    = new User($entityUrl);
             $servers = $this->discovery->discoverServers($entityUrl);
 
@@ -200,7 +206,7 @@ class Client
             throw new \RuntimeException("Could not find application config for " . $serverUrl);
         }
 
-        $url  = $serverUrl . "/apps/" . $user->appId;
+        $url  = $user->serverUrl . "/apps/" . $user->appId;
         $auth = HmacHelper::generateAuthorizationHeader('GET', $url, $user->appMacKey, $user->appMacSecret);
 
         $headers = array(
