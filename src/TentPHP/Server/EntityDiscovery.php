@@ -97,7 +97,7 @@ class EntityDiscovery
                 return $parentUrl . $url;
             }
 
-            $parts = parse_url($entityUrl);
+            $parts = parse_url($url);
             $port  = isset($parts['port']) ? ":" . $parts['port'] : "";
             $url   = $parts['scheme'] . "://" . $parts['host'] . $port . $parentUrl;
         }
