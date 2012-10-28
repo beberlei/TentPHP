@@ -62,6 +62,7 @@ class Client
      */
     public function getUserClient($entityUrl, $authenticated = true)
     {
+        $user = null;
         if ($authenticated) {
             $user = $this->userStorage->load($entityUrl);
         }
