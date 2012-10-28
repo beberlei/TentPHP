@@ -60,11 +60,13 @@ class Client
      *
      * @return UserClient
      */
-    public function getUserClient($entityUrl)
+    public function getUserClient($entityUrl, $authenticated = true)
     {
-        $user = $this->userStorage->load($entityUrl);
+        if ($authenticated) {
+            $user = $this->userStorage->load($entityUrl);
+        }
 
-        if (!$user) {
+        if (!$authenticated || !$user) {
             $servers   = $this->discovery->discoverServers($entityUrl);
             $serverUrl = array_shift($servers);
         } else {
