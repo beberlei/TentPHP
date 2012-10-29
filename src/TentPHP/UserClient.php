@@ -30,9 +30,31 @@ class UserClient
         return $this->request('PUT', '/profile/' . urlencode($type), $data);
     }
 
-    public function follow($entityUrl)
+    /**
+     * Follow an entity, optionally inside some groups
+     *
+     * @param string $entityUrl
+     * @param array $groups Ids of groups
+     * @return array
+     */
+    public function follow($entityUrl, array $groups = array())
     {
-        return $this->request('POST', '/followings', array('entity' => $entityUrl));
+        return $this->request('POST', '/followings', array_filter(array(
+            'entity' => $entityUrl,
+            'groups' => $groups
+        )));
+    }
+
+    /**
+     * Update the Following groups of a follower
+     *
+     * @param string $remoteId
+     * @param array $groups
+     * @return array
+     */
+    public function updateFollowing($remoteId, array $groups)
+    {
+        return $this->request('PUT', '/followings/' . $id, array('groups' => $groups));
     }
 
     public function getFollowings()
@@ -148,6 +170,89 @@ class UserClient
     public function getPostAttachment($id, $filename)
     {
         throw new \RuntimeException("Not yet implemented.");
+    }
+
+    /**
+     * Return all groups of the current user.
+     *
+     * @return Group[]
+     */
+    public function getGroups()
+    {
+        $result = $this->request('GET', '/groups');
+        $groups = array();
+
+        foreach ($result as $row) {
+            $groups[] = new Group(
+                $row['id'],
+                $row['name'],
+                $row['created_at'] ? new \DateTime('@' . $row['created_at']) : null,
+                $row['updated_at'] ? new \DateTime('@' . $row['updated_at']) : null
+            );
+        }
+
+        return $groups;
+    }
+
+    /**
+     * Create a new group
+     *
+     * @param string $name
+     * @return
+     */
+    public function createGroup($name)
+    {
+        return $this->request('POST', '/groups', array('name' => $name));
+    }
+
+    /**
+     * Get a group
+     *
+     * @param string $id
+     */
+    public function getGroup($id)
+    {
+        if ($id == 'count') {
+            throw new \RuntimeException("Invalid access");
+        }
+
+        $row = $this->request('GET', '/groups/' . $id);
+        return new Group(
+            $row['id'],
+            $row['name'],
+            $row['created_at'] ? new \DateTime('@' . $row['created_at']) : null,
+            $row['updated_at'] ? new \DateTime('@' . $row['updated_at']) : null
+        );
+    }
+
+    /**
+     * Delete group with given id
+     *
+     * @param string $id
+     */
+    public function deleteGroup($id)
+    {
+        if ($id == 'count') {
+            throw new \RuntimeException("Invalid access");
+        }
+
+        return $this->request('DELETE', '/groups/' . $id);
+    }
+
+    /**
+     * Update a group name
+     *
+     * @param string $id
+     * @param string $name
+     * @return
+     */
+    public function updateGroup($id, $name)
+    {
+        if ($id == 'count') {
+            throw new \RuntimeException("Invalid access");
+        }
+
+        return $this->request('PUT', '/groups/' . $id, array('name' => $name));
     }
 
     protected function request($method, $url, $body = null)
