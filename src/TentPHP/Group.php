@@ -25,7 +25,7 @@ class Group
         $this->id      = $id;
         $this->name    = $name;
         $this->created = $created;
-        $this->updated = $udpated;
+        $this->updated = $updated;
     }
 }
 
