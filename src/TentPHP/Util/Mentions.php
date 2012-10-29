@@ -31,11 +31,14 @@ class Mentions
 
             foreach ($matches[2] as $match) {
                 list($entity, $pos) = $match;
+
+                $entity = rtrim($entity, '.!?');
+
                 if (strpos($entity, "http") === false) {
                     $entity = $contextParts['scheme'] . "://" . $entity . "." . implode(".", $hostParts);
                 }
 
-                $mentions[] = array('entity' => $entity, 'pos' => $pos - 1, 'length' => strlen($match[0])+1);
+                $mentions[] = array('entity' => $entity, 'pos' => $pos - 1, 'length' => strlen(rtrim($match[0], '.!?'))+1);
             }
         }
 

@@ -36,5 +36,16 @@ class MentionsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(array(array('entity' => 'https://foo.bar.is', 'pos' => 0, 'length' => 19)), $data);
     }
+
+    public function testTrimSignsAtTheEnd()
+    {
+        $data = $this->mentions->extractMentions("^beberlei? ^beberlei2! ^beberlei3.", "https://beberlei.tent.is");
+
+        $this->assertEquals(array(
+            array("entity" => "https://beberlei.tent.is", "pos" => 0, "length" => 9),
+            array("entity" => "https://beberlei2.tent.is", "pos" => 11, "length" => 10),
+            array("entity" => "https://beberlei3.tent.is", "pos" => 23, "length" => 10),
+        ), $data);
+    }
 }
 
