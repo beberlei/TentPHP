@@ -116,9 +116,28 @@ class UserClient
         return $this->request('DELETE', '/posts/' . $post);
     }
 
+    /**
+     * Get the posts matching the criteria
+     *
+     * @param PostCriteria $criteria
+     * @return int
+     */
     public function getPosts(PostCriteria $criteria = null)
     {
-        return $this->request('GET', '/posts?' . http_build_query($criteria->toArray()));
+        $query = $criteria ? http_build_query($criteria->toArray()) : '';
+        return $this->request('GET', '/posts?' . $query);
+    }
+
+    /**
+     * Get the total count of posts for a given set of criteria
+     *
+     * @param PostCriteria $criteria
+     * @return int
+     */
+    public function getPostCount(PostCriteria $criteria = null)
+    {
+        $query = $criteria ? http_build_query($criteria->toArray()) : '';
+        return $this->request('GET', '/posts/count?' . $query);
     }
 
     public function getPost($id)
