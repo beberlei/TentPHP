@@ -45,6 +45,16 @@ class UserClient
         return $this->request('GET', '/followings/' . $remoteId);
     }
 
+    /**
+     * Get the count of followings
+     *
+     * @return int
+     */
+    public function getFollowingCount()
+    {
+        return $this->request('GET', '/followings/count');
+    }
+
     public function unfollow($remoteId)
     {
         return $this->request('DELETE', '/followings/' . $remoteId);
@@ -58,6 +68,16 @@ class UserClient
     public function getFollower($remoteId)
     {
         return $this->request('GET', '/followers/' . $remoteId);
+    }
+
+    /**
+     * Get the count of followers
+     *
+     * @return int
+     */
+    public function getFollowerCount()
+    {
+        return $this->request('GET', '/followers/count');
     }
 
     public function blockFollower($remoteId)
