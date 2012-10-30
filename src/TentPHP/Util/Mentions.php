@@ -24,32 +24,47 @@ class Mentions
     {
         $mentions     = array();
         $contextParts = parse_url($contextEntity);
-        $hostParts    = explode(".", $contextParts['host']);
-        array_shift($hostParts);
-        $contextHost  = implode(".", $hostParts);
+        $contextHost  = $this->getContextHost($contextParts);
 
         if (preg_match_all('(('.preg_quote($character). '([^\s]+)))', $text, $matches, PREG_OFFSET_CAPTURE)) {
 
             foreach ($matches[2] as $match) {
                 list($entity, $pos) = $match;
 
-                $entity = rtrim($entity, '.!?');
-
-                if (strpos($entity, "http") === false) {
-                    if(strpos($entity, ".") === false) {
-                        $entity = $contextParts['scheme'] . "://" . $entity . "." . $contextHost;
-                    } elseif (strpos($entity, $contextHost) === false) {
-                        $entity = "http://" . $entity;
-                    } else {
-                        $entity = $contextParts['scheme'] . "://" . $entity;
-                    }
-                }
-
-                $mentions[] = array('entity' => $entity, 'pos' => $pos - 1, 'length' => strlen(rtrim($match[0], '.!?'))+1);
+                $entity     = $this->normalizeEntity($entity, $contextHost, $contextParts['scheme']);
+                $mentions[] = array(
+                    'entity' => $entity,
+                    'pos'    => $pos - 1,
+                    'length' => strlen(rtrim($match[0], '.!?'))+1
+                );
             }
         }
 
         return $mentions;
+    }
+
+    private function getContextHost($contextParts)
+    {
+        $hostParts    = explode(".", $contextParts['host']);
+        array_shift($hostParts);
+        return implode(".", $hostParts);
+    }
+
+    private function normalizeEntity($entity, $contextHost, $scheme)
+    {
+        $entity = rtrim($entity, '.!?');
+
+        if (strpos($entity, "http") === false) {
+            if(strpos($entity, ".") === false) {
+                $entity = $scheme . "://" . $entity . "." . $contextHost;
+            } elseif (strpos($entity, $contextHost) === false) {
+                $entity = "http://" . $entity;
+            } else {
+                $entity = $scheme . "://" . $entity;
+            }
+        }
+
+        return $entity;
     }
 }
 
