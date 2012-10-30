@@ -26,6 +26,7 @@ class Mentions
         $contextParts = parse_url($contextEntity);
         $hostParts    = explode(".", $contextParts['host']);
         array_shift($hostParts);
+        $contextHost  = implode(".", $hostParts);
 
         if (preg_match_all('(('.preg_quote($character). '([^\s]+)))', $text, $matches, PREG_OFFSET_CAPTURE)) {
 
@@ -35,8 +36,10 @@ class Mentions
                 $entity = rtrim($entity, '.!?');
 
                 if (strpos($entity, "http") === false) {
-                    if (strpos($entity, implode(".", $hostParts)) === false) {
-                        $entity = $contextParts['scheme'] . "://" . $entity . "." . implode(".", $hostParts);
+                    if(strpos($entity, ".") === false) {
+                        $entity = $contextParts['scheme'] . "://" . $entity . "." . $contextHost;
+                    } elseif (strpos($entity, $contextHost) === false) {
+                        $entity = "http://" . $entity;
                     } else {
                         $entity = $contextParts['scheme'] . "://" . $entity;
                     }

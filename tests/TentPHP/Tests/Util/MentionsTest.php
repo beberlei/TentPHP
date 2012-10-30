@@ -54,5 +54,12 @@ class MentionsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(array(array('entity' => 'https://shawnj.tent.is', 'pos' => 0, 'length' => 15)), $data);
     }
+
+    public function testErrorExternal()
+    {
+        $data = $this->mentions->extractMentions("^jeena.net", "https://beberlei.tent.is");
+
+        $this->assertEquals(array(array('entity' => 'http://jeena.net', 'pos' => 0, 'length' => 10)), $data);
+    }
 }
 
