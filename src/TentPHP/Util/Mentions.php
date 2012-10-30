@@ -35,7 +35,11 @@ class Mentions
                 $entity = rtrim($entity, '.!?');
 
                 if (strpos($entity, "http") === false) {
-                    $entity = $contextParts['scheme'] . "://" . $entity . "." . implode(".", $hostParts);
+                    if (strpos($entity, implode(".", $hostParts)) === false) {
+                        $entity = $contextParts['scheme'] . "://" . $entity . "." . implode(".", $hostParts);
+                    } else {
+                        $entity = $contextParts['scheme'] . "://" . $entity;
+                    }
                 }
 
                 $mentions[] = array('entity' => $entity, 'pos' => $pos - 1, 'length' => strlen(rtrim($match[0], '.!?'))+1);

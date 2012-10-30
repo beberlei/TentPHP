@@ -47,5 +47,12 @@ class MentionsTest extends \PHPUnit_Framework_TestCase
             array("entity" => "https://beberlei3.tent.is", "pos" => 23, "length" => 10),
         ), $data);
     }
+
+    public function testParseErrorCase()
+    {
+        $data = $this->mentions->extractMentions("^shawnj.tent.is", "https://beberlei.tent.is");
+
+        $this->assertEquals(array(array('entity' => 'https://shawnj.tent.is', 'pos' => 0, 'length' => 15)), $data);
+    }
 }
 
