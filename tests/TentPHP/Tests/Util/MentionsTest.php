@@ -61,5 +61,11 @@ class MentionsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(array(array('entity' => 'http://jeena.net', 'pos' => 0, 'length' => 10)), $data);
     }
+
+    public function testNormalizeMention()
+    {
+        $this->assertEquals('http://jeena.net', $this->mentions->normalize('jeena.net', 'https://beberlei.tent.is'));
+        $this->assertEquals('https://foo.tent.is', $this->mentions->normalize('foo', 'https://beberlei.tent.is'));
+    }
 }
 

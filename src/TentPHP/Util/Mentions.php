@@ -50,6 +50,21 @@ class Mentions
         return implode(".", $hostParts);
     }
 
+    /**
+     * From a short entityname this method normalizes the entity
+     * to the full entity name given the current users entity name
+     * as a reference.
+     *
+     * @param string $mention
+     * @param string $contextEntity
+     */
+    public function normalize($mention, $contextEntity)
+    {
+        $contextParts = parse_url($contextEntity);
+        $contextHost  = $this->getContextHost($contextParts);
+        return $this->normalizeEntity($mention, $contextHost, $contextParts['scheme']);
+    }
+
     private function normalizeEntity($entity, $contextHost, $scheme)
     {
         $entity = rtrim($entity, '.!?,');
