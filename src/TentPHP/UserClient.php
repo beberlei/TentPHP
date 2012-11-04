@@ -57,8 +57,15 @@ class UserClient
         return $this->request('PUT', '/followings/' . $id, array('groups' => $groups));
     }
 
-    public function getFollowings()
+    /**
+     * Get the followings
+     *
+     * @param array $params
+     * @return array
+     */
+    public function getFollowings(array $params = array())
     {
+        $query = $params ? '?' . http_build_query($params) : '';
         return $this->request('GET', '/followings');
     }
 
@@ -82,9 +89,16 @@ class UserClient
         return $this->request('DELETE', '/followings/' . $remoteId);
     }
 
-    public function getFollowers()
+    /**
+     * Get the followers
+     *
+     * @param array $params
+     * @return array
+     */
+    public function getFollowers(array $params = array())
     {
-        return $this->request('GET', '/followers');
+        $query = $params ? '?' . http_build_query($params) : '';
+        return $this->request('GET', '/followers' . $query);
     }
 
     public function getFollower($remoteId)
