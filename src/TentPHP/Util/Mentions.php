@@ -35,7 +35,7 @@ class Mentions
                 $mentions[] = array(
                     'entity' => $entity,
                     'pos'    => $pos - 1,
-                    'length' => strlen(rtrim($match[0], '.!?'))+1
+                    'length' => strlen(rtrim($match[0], ")'?.!,;:"))+1
                 );
             }
         }
