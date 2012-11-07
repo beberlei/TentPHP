@@ -233,11 +233,15 @@ class Client
     {
         $user = $this->userStorage->load($entityUrl);
 
-        if (!$user->appId) {
-            throw new \RuntimeException("Could not find application config for " . $serverUrl);
+        if (!$user || !$user->appId) {
+            return;
         }
 
-        return $this->appRegistration->update($this->application, $config, $serverUrl);
+        try {
+            return $this->appRegistration->update($this->application, $user);
+        } catch(GuzzleException $e) {
+            return false;
+        }
     }
 }
 
