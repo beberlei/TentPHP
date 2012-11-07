@@ -35,19 +35,23 @@ class Post extends DataObject
 
     public function addMention($entityUrl, $post = null)
     {
+        if (isset($this->data['mentions'][$entityUrl])) {
+            return $this;
+        }
+
         $data = array('entity' => $entityUrl);
 
         if ($post) {
             $data['post'] = $post;
         }
 
-        $this->data['mentions'][] = $data;
+        $this->data['mentions'][$entityUrl] = $data;
         return $this;
     }
 
     public function getMentions()
     {
-        return $this->data['mentions'];
+        return array_values($this->data['mentions']);
     }
 
     public function addLicense($licenseUrl)
