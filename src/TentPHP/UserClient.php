@@ -66,7 +66,7 @@ class UserClient
     public function getFollowings(array $params = array())
     {
         $query = $params ? '?' . http_build_query($params) : '';
-        return $this->request('GET', '/followings');
+        return $this->request('GET', '/followings' . $query);
     }
 
     public function getFollowing($remoteId)
