@@ -74,5 +74,9 @@ class MentionsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(array(array('entity' => 'https://marco.tent.is', 'pos' => 0, 'length' => 6)), $data);
     }
+
+    public function testPunctuation()
+    {
+    }
 }
 

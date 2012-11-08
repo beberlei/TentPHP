@@ -67,7 +67,7 @@ class Mentions
 
     private function normalizeEntity($entity, $contextHost, $scheme)
     {
-        $entity = rtrim($entity, '.!?,');
+        $entity = rtrim($entity, ']).!?,');
 
         if (strpos($entity, "http") === false) {
             if(strpos($entity, ".") === false) {
