@@ -67,5 +67,12 @@ class MentionsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('http://jeena.net', $this->mentions->normalize('jeena.net', 'https://beberlei.tent.is'));
         $this->assertEquals('https://foo.tent.is', $this->mentions->normalize('foo', 'https://beberlei.tent.is'));
     }
+
+    public function testTrailingApostrophe()
+    {
+        $data = $this->mentions->extractMentions("^marco's", "https://beberlei.tent.is");
+
+        $this->assertEquals(array(array('entity' => 'https://marco.tent.is', 'pos' => 0, 'length' => 6)), $data);
+    }
 }
 

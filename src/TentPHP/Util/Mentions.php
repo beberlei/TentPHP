@@ -26,7 +26,7 @@ class Mentions
         $contextParts = parse_url($contextEntity);
         $contextHost  = $this->getContextHost($contextParts);
 
-        if (preg_match_all('(('.preg_quote($character). '([^\s]+)))', $text, $matches, PREG_OFFSET_CAPTURE)) {
+        if (preg_match_all('(('.preg_quote($character). '([^\'\s]+)))', $text, $matches, PREG_OFFSET_CAPTURE)) {
 
             foreach ($matches[2] as $match) {
                 list($entity, $pos) = $match;
