@@ -33,12 +33,15 @@ class TentServiceProvider implements ServiceProviderInterface
             return new DoctrineUserStorage($app['db']);
         });
 
+        $app['tent.http.client'] = $app->share(function ($app) {
+            return new HttpClient();
+        });
+
         $app['tent.client'] = $app->share(function($app) {
-            $httpClient = new HttpClient();
 
             return new Client(
                 $app['tent.application'],
-                $httpClient,
+                $app['tent.http.client'],
                 $app['tent.user_storage'],
                 $app['tent.session_state']
             );
